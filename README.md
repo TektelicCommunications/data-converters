@@ -30,3 +30,4 @@ module.exports = Decoder;
 
 ### Notes
 - The BLE Tracker is now referred to as the Enterprise Asset Tracker
+- Tundra Sensor is also referred to as the Cold Room Sensor
