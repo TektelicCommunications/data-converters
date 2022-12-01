@@ -28,7 +28,7 @@ There are four versions of each data converters available.
 2. Click on `DATA CONVERTERS` tab on the left
 3. Click `+` symbol on top right to add a Data Converter
 4. Enter a Name for the Data Converter and Select `Custom` if using `Tektelic v1` data converters or `Custom v2` if using `Tektelic v2` data converters
-5. Copy the code in the data converter file that you wish to use and paste it available sections
+5. Copy the code in the data converter file that you wish to use and paste it in the available sections
 6. Click `Add`
 
 ### Notes
