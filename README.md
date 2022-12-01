@@ -1,20 +1,22 @@
 # Data Converters for TEKTELIC Devices
-This repository contains the data converters that are to be used on TEKTELIC & TTN Network Server for TEKTELIC Sensors. These data converters can be used as a reference for other platforms.
+This repository contains the data converters that are to be used on TEKTELIC & other Network Server for TEKTELIC Sensors. These data converters can be used as a reference for other platforms.
 
 ### Available Sensors 
-- Aura Flux
-- Breeze
-- Clover
-- Comfort
-- eDoctor
-- Industrial Transceiver
-- Kiwi
-- Orca
-- Pelican/EX
-- Seal
-- Sparrow
-- Tundra
-- Vivid
+- AURA
+- BREEZE
+- CLOVER
+- COMFORT
+- EDOCTOR
+- FLUX
+- INDUSTRIAL TRANSCIVER
+- KIWI
+- ORCA
+- PELICAN
+- PELICAN EX
+- SEAL
+- SPARROW
+- TUNDRA
+- VIVID
 
 ### Available Versions
 There are four versions of each data converters available.
@@ -24,7 +26,7 @@ There are four versions of each data converters available.
 - TTN v3
 
 ### How to add Data Converter to TEKTELIC Network Server
-1. Log into Tektelic Network Server ([NA](https://lorawan-ns-na.tektelic.com) or [EU](https://lorawan-ns-eu.tektelic.com))
+1. Log into TEKTELIC Network Server ([NA](https://lorawan-ns-na.tektelic.com) or [EU](https://lorawan-ns-eu.tektelic.com))
 2. Click on `DATA CONVERTERS` tab on the left
 3. Click `+` symbol on top right to add a Data Converter
 4. Enter a Name for the Data Converter and Select `Custom` if using `Tektelic v1` data converters or `Custom v2` if using `Tektelic v2` data converters
