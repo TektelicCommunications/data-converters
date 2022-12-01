@@ -21,7 +21,7 @@ This repository contains the data converters that are to be used on TEKTELIC & o
 ### Available Versions
 There are four versions of each data converters available.
 - Tektelic v1
-- Tektelic v2
+- Tektelic v2 (LoRa Alliance® LoRaWAN® Payload Codec API 1.0.0 compliant)
 - TTN v2
 - TTN v3
 
