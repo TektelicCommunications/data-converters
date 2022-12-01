@@ -8,7 +8,7 @@ This repository contains the data converters that are to be used on TEKTELIC & o
 - COMFORT
 - EDOCTOR
 - FLUX
-- INDUSTRIAL TRANSCIVER
+- INDUSTRIAL TRANSCEIVER
 - KIWI
 - ORCA
 - PELICAN
