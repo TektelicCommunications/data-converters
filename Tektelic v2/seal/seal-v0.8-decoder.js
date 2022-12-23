@@ -1,4 +1,4 @@
-function decodeUplink(input){
+//function decodeUplink(input){
 
 	var decoded_data = {};
 	var decoder = [];
@@ -1346,4 +1346,4 @@ if (input.fPort === 15) {
     }
 
     return output;
-}
+//}

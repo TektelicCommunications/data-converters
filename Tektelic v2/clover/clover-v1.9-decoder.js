@@ -1,4 +1,4 @@
-function decodeUplink(input){
+//function decodeUplink(input){
 
 	var decoded_data = {};
 	var decoder = [];
@@ -788,14 +788,49 @@ if (input.fPort === 10) {
 		{
 			key: [0x01, 0x04],
 			fn: function(arg) { 
-				decoded_data['input1_frequency'] = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				if (val > 2781){
+					output = "Dry";
+				} else if (val > 2776 && val <= 2781){
+					output = 0.1;
+				} else if (val > 2771 && val <= 2776){
+					output = 0.2;
+				} else if (val > 2766 && val <= 2771){
+					output = 0.3;
+				} else if (val > 2761 && val <= 2766){
+					output = 0.4;
+				} else if (val > 2756 && val <= 2761){
+					output = 0.5;
+				} else if (val > 2751 && val <= 2756){
+					output = 0.6;
+				} else if (val > 2746 && val <= 2751){
+					output = 0.7;
+				} else if (val > 2741 && val <= 2746){
+					output = 0.8;
+				} else if (val > 2736 && val <= 2741){
+					output = 0.9;
+				} else if (val > 2731 && val <= 2736){
+					output = 1.0;
+				} else if (val > 2726 && val <= 2731){
+					output = 1.1;
+				} else if (val > 2721 && val <= 2726){
+					output = 1.2;
+				} else {
+					output = "Wet";
+				}
+				decoded_data['soil_moisture'] = output;
+				decoded_data['soil_moisture_raw'] = val;
 				return 2;
 			}
 		},
 		{
 			key: [0x02, 0x02],
 			fn: function(arg) { 
-				decoded_data['input2_voltage'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 2.39e-5 * Math.pow(val, 2) - 0.1011 * val + 77.34;
+				decoded_data['soil_temperature'] = output;
+				decoded_data['soil_temperature_raw'] = val;
 				return 2;
 			}
 		},
@@ -1080,4 +1115,4 @@ if (input.fPort === 10) {
     }
 
     return output;
-}
+//}

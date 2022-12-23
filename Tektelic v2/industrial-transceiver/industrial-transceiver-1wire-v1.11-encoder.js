@@ -1,4 +1,4 @@
-function encodeDownlink(input) {
+//function encodeDownlink(input) {
    var sensor = 
 {
     "lorawan": {
@@ -937,83 +937,148 @@ function encodeDownlink(input) {
             }
         }
     },
-    "modbus_rtu_config": {
-        "modbus_rtu_polling_period_6A": {
-            "header": "0x6A",
-            "data_size": 10,
-            "bit_start": 79,
+    "one_wire": {
+        "thermometer_tick_idle": {
+            "header": "0x73",
+            "data_size": 2,
+            "bit_start": 15,
             "bit_end": 0,
             "type": "unsigned",
             "round": "",
             "coefficient": 1,
             "access": "RW",
             "multiple": 0,
-            "port": 21,
+            "port": 100,
             "or_80_to_write": 1
         },
-        "modbus_rtu_polling_period_6B": {
-            "header": "0x6B",
-            "data_size": 10,
-            "bit_start": 79,
+        "thermometer_tick_active": {
+            "header": "0x74",
+            "data_size": 2,
+            "bit_start": 15,
             "bit_end": 0,
             "type": "unsigned",
             "round": "",
             "coefficient": 1,
             "access": "RW",
             "multiple": 0,
-            "port": 22,
+            "port": 100,
             "or_80_to_write": 1
         },
-        "modbus_rtu_polling_period_6C": {
-            "header": "0x6C",
-            "data_size": 10,
-            "bit_start": 79,
+        "thermometer_periodic_enable_h0": {
+            "header": "0x75",
+            "data_size": 2,
+            "bit_start": 15,
             "bit_end": 0,
             "type": "unsigned",
             "round": "",
             "coefficient": 1,
             "access": "RW",
             "multiple": 0,
-            "port": 23,
+            "port": 100,
             "or_80_to_write": 1
         },
-        "modbus_rtu_polling_period_6D": {
-            "header": "0x6D",
-            "data_size": 10,
-            "bit_start": 79,
+        "thermometer_periodic_enable_h1": {
+            "header": "0x76",
+            "data_size": 2,
+            "bit_start": 15,
             "bit_end": 0,
             "type": "unsigned",
             "round": "",
             "coefficient": 1,
             "access": "RW",
             "multiple": 0,
-            "port": 24,
+            "port": 100,
             "or_80_to_write": 1
         },
-        "modbus_rtu_polling_period_6E": {
-            "header": "0x6E",
-            "data_size": 10,
-            "bit_start": 79,
+        "thermometer_sample_idle": {
+            "header": "0x77",
+            "data_size": 4,
+            "bit_start": 31,
             "bit_end": 0,
             "type": "unsigned",
             "round": "",
             "coefficient": 1,
             "access": "RW",
             "multiple": 0,
-            "port": 25,
+            "port": 100,
             "or_80_to_write": 1
         },
-        "modbus_rtu_polling_period_6F": {
-            "header": "0x6F",
-            "data_size": 10,
-            "bit_start": 79,
+        "thermometer_sample_active": {
+            "header": "0x78",
+            "data_size": 4,
+            "bit_start": 31,
             "bit_end": 0,
             "type": "unsigned",
             "round": "",
             "coefficient": 1,
             "access": "RW",
             "multiple": 0,
-            "port": 26,
+            "port": 100,
+            "or_80_to_write": 1
+        },
+        "thermometer_threshold_high": {
+            "header": "0x79",
+            "data_size": 2,
+            "bit_start": 7,
+            "bit_end": 0,
+            "type": "signed",
+            "round": "",
+            "coefficient": 1,
+            "access": "RW",
+            "multiple": 0,
+            "port": 100,
+            "or_80_to_write": 1
+        },
+        "thermometer_threshold_low": {
+            "header": "0x79",
+            "data_size": 2,
+            "bit_start": 15,
+            "bit_end": 8,
+            "type": "signed",
+            "round": "",
+            "coefficient": 1,
+            "access": "RW",
+            "multiple": 0,
+            "port": 100,
+            "or_80_to_write": 1
+        },
+        "thermometer_threshold_enable_h0": {
+            "header": "0x7A",
+            "data_size": 2,
+            "bit_start": 15,
+            "bit_end": 0,
+            "type": "unsigned",
+            "round": "",
+            "coefficient": 1,
+            "access": "RW",
+            "multiple": 0,
+            "port": 100,
+            "or_80_to_write": 1
+        },
+        "thermometer_threshold_enable_h1": {
+            "header": "0x7B",
+            "data_size": 2,
+            "bit_start": 15,
+            "bit_end": 0,
+            "type": "unsigned",
+            "round": "",
+            "coefficient": 1,
+            "access": "RW",
+            "multiple": 0,
+            "port": 100,
+            "or_80_to_write": 1
+        },
+        "thermometer_resolution": {
+            "header": "0x7C",
+            "data_size": 1,
+            "bit_start": 7,
+            "bit_end": 0,
+            "type": "unsigned",
+            "round": "",
+            "coefficient": 1,
+            "access": "RW",
+            "multiple": 0,
+            "port": 100,
             "or_80_to_write": 1
         }
     }
@@ -1508,4 +1573,4 @@ function encodeDownlink(input) {
     }
 
     return encode(input, sensor);
-}
+//}

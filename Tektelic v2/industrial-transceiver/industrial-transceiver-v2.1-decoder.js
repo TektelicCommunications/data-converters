@@ -1,4 +1,4 @@
-function decodeUplink(input){
+//function decodeUplink(input){
 
 	var decoded_data = {};
 	var decoder = [];
@@ -696,77 +696,6 @@ if (input.fPort === 100) {
 				return 7;
 			}
 		},
-		{
-			key: [0x73],
-			fn: function(arg) { 
-				decoded_data['thermometer_tick_idle'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x74],
-			fn: function(arg) { 
-				decoded_data['thermometer_tick_active'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x75],
-			fn: function(arg) { 
-				decoded_data['thermometer_periodic_enable_h0'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x76],
-			fn: function(arg) { 
-				decoded_data['thermometer_periodic_enable_h1'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x77],
-			fn: function(arg) { 
-				decoded_data['thermometer_sample_idle'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x78],
-			fn: function(arg) { 
-				decoded_data['thermometer_sample_active'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x79],
-			fn: function(arg) { 
-				decoded_data['thermometer_threshold_high'] = decode_field(arg, 2, 7, 0, "signed");
-				decoded_data['thermometer_threshold_low'] = decode_field(arg, 2, 15, 8, "signed");
-				return 2;
-			}
-		},
-		{
-			key: [0x7A],
-			fn: function(arg) { 
-				decoded_data['thermometer_threshold_enable_h0'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x7B],
-			fn: function(arg) { 
-				decoded_data['thermometer_threshold_enable_h1'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x7C],
-			fn: function(arg) { 
-				decoded_data['thermometer_resolution'] = decode_field(arg, 1, 7, 0, "unsigned");
-				return 1;
-			}
-		},
 	];
 }
 if (input.fPort === 20) {
@@ -779,6 +708,72 @@ if (input.fPort === 20) {
 				decoded_data['fragment_number'] = decode_field(arg, 1, 4, 0, "unsigned");
 				decoded_data['serial_data'] = decode_field(arg, 1, 511, 8, "unsigned");
 				return 1;
+			}
+		},
+	];
+}
+if (input.fPort === 21) {
+	decoder = [
+		{
+			key: [0x6A],
+			fn: function(arg) { 
+				decoded_data['modbus_rtu_polling_period_6A'] = decode_field(arg, 10, 79, 0, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 22) {
+	decoder = [
+		{
+			key: [0x6B],
+			fn: function(arg) { 
+				decoded_data['modbus_rtu_polling_period_6B'] = decode_field(arg, 10, 79, 0, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 23) {
+	decoder = [
+		{
+			key: [0x6C],
+			fn: function(arg) { 
+				decoded_data['modbus_rtu_polling_period_6C'] = decode_field(arg, 10, 79, 0, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 24) {
+	decoder = [
+		{
+			key: [0x6D],
+			fn: function(arg) { 
+				decoded_data['modbus_rtu_polling_period_6D'] = decode_field(arg, 10, 79, 0, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 25) {
+	decoder = [
+		{
+			key: [0x6E],
+			fn: function(arg) { 
+				decoded_data['modbus_rtu_polling_period_6E'] = decode_field(arg, 10, 79, 0, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 26) {
+	decoder = [
+		{
+			key: [0x6F],
+			fn: function(arg) { 
+				decoded_data['modbus_rtu_polling_period_6F'] = decode_field(arg, 10, 79, 0, "unsigned");
+				return 10;
 			}
 		},
 	];
@@ -846,10 +841,10 @@ if (input.fPort === 10) {
 				var val = decode_field(arg, 1, 7, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['input_1'] = "FALSE";
+						decoded_data['input_1'] = "False";
 						break;
 					case 1:
-						decoded_data['input_1'] = "TRUE";
+						decoded_data['input_1'] = "True";
 						break;
 					default:
 						decoded_data['input_1'] = "Invalid";
@@ -1037,4 +1032,4 @@ if (input.fPort === 10) {
     }
 
     return output;
-}
+//}

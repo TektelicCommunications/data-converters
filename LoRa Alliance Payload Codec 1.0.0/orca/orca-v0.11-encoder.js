@@ -1,4 +1,4 @@
-//function decodeDownlink(input) {
+function decodeDownlink(input) {
 var sensor = 
 {
     "lorawan": {
@@ -1936,4 +1936,4 @@ return {
     warnings: [],
     errors: []
   }
-//}
+}
