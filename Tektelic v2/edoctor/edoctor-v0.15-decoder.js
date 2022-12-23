@@ -1,4 +1,4 @@
-function decodeUplink(input){
+//function decodeUplink(input){
 
 	var decoded_data = {};
 	var decoder = [];
@@ -38,69 +38,6 @@ function decodeUplink(input){
 		];
 	}
 
-if (input.fPort === 10) {
-	decoder = [
-		{
-			key: [0x00, 0xFF],
-			fn: function(arg) { 
-				decoded_data['battery'] = (decode_field(arg, 2, 15, 0, "signed") * 0.01).toFixed(2);
-				return 2;
-			}
-		},
-		{
-			key: [0x0B, 0x67],
-			fn: function(arg) { 
-				decoded_data['mcu_temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
-				return 2;
-			}
-		},
-		{
-			key: [0x03, 0x67],
-			fn: function(arg) { 
-				decoded_data['ambient_temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
-				return 2;
-			}
-		},
-		{
-			key: [0x04, 0x68],
-			fn: function(arg) { 
-				decoded_data['relative_humidity'] = (decode_field(arg, 1, 7, 0, "unsigned") * 0.5).toFixed(1);
-				return 1;
-			}
-		},
-		{
-			key: [0x0E, 0x00],
-			fn: function(arg) { 
-				var val = decode_field(arg, 1, 7, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['ext_reed_switch_state'] = "Magnet Present";
-						break;
-					case 255:
-						decoded_data['ext_reed_switch_state'] = "Magnet Absent";
-						break;
-					default:
-						decoded_data['ext_reed_switch_state'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x0F, 0x04],
-			fn: function(arg) { 
-				decoded_data['ext_reed_switch_count'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x02, 0x02],
-			fn: function(arg) { 
-				decoded_data['ext_probe_voltage'] = (decode_field(arg, 2, 15, 0, "signed") * 0.001).toFixed(3);
-				return 2;
-			}
-		},
-	];
-}
 if (input.fPort === 100) {
 	decoder = [
 		{
@@ -143,48 +80,6 @@ if (input.fPort === 100) {
 			fn: function(arg) { 
 				decoded_data['app_session_key'] = decode_field(arg, 16, 127, 0, "hexstring");
 				return 16;
-			}
-		},
-		{
-			key: [0x0F],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('tagged_telemetry')) {
-					decoded_data['tagged_telemetry'] = {};
-				}
-				var val = decode_field(arg, 2, 4, 4, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['tagged_telemetry']['rh_tag_status'] = "Not Tagged";
-						break;
-					case 1:
-						decoded_data['tagged_telemetry']['rh_tag_status'] = "Tagged";
-						break;
-					default:
-						decoded_data['tagged_telemetry']['rh_tag_status'] = "Invalid";
-				}}
-				var val = decode_field(arg, 2, 3, 3, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['tagged_telemetry']['temp_tag_status'] = "Not Tagged";
-						break;
-					case 1:
-						decoded_data['tagged_telemetry']['temp_tag_status'] = "Tagged";
-						break;
-					default:
-						decoded_data['tagged_telemetry']['temp_tag_status'] = "Invalid";
-				}}
-				var val = decode_field(arg, 2, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['tagged_telemetry']['ext_probe_tag_status'] = "Not Tagged";
-						break;
-					case 1:
-						decoded_data['tagged_telemetry']['ext_probe_tag_status'] = "Tagged";
-						break;
-					default:
-						decoded_data['tagged_telemetry']['ext_probe_tag_status'] = "Invalid";
-				}}
-				return 2;
 			}
 		},
 		{
@@ -258,25 +153,24 @@ if (input.fPort === 100) {
 			}
 		},
 		{
-			key: [0x12],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('loramac_dr_tx')) {
-					decoded_data['loramac_dr_tx'] = {};
-				}
-				decoded_data['loramac_dr_tx']['dr_number'] = decode_field(arg, 2, 11, 8, "unsigned");
-				decoded_data['loramac_dr_tx']['tx_power'] = decode_field(arg, 2, 3, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
 			key: [0x13],
 			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('loramac_rx2')) {
 					decoded_data['loramac_rx2'] = {};
 				}
+				decoded_data['loramac_rx2']['dr_number'] = decode_field(arg, 5, 7, 0, "unsigned");
 				decoded_data['loramac_rx2']['frequency'] = decode_field(arg, 5, 39, 8, "unsigned");
-				decoded_data['loramac_rx2']['dr_number_rx2'] = decode_field(arg, 5, 7, 0, "unsigned");
 				return 5;
+			}
+		},
+		{
+			key: [0x12],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('loramac_dr_tx')) {
+					decoded_data['loramac_dr_tx'] = {};
+				}
+				decoded_data['loramac_dr_tx']['tx_power'] = decode_field(arg, 2, 3, 0, "unsigned");
+				return 2;
 			}
 		},
 		{
@@ -296,277 +190,270 @@ if (input.fPort === 100) {
 		{
 			key: [0x20],
 			fn: function(arg) { 
-				decoded_data['core'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
+				decoded_data['normal_report_period'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
 			}
 		},
 		{
 			key: [0x21],
 			fn: function(arg) { 
-				decoded_data['per_battery'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				decoded_data['ua_report_period'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
 			}
 		},
 		{
 			key: [0x22],
 			fn: function(arg) { 
-				decoded_data['per_ambient_temp'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				decoded_data['rest_report_period'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
 			}
 		},
 		{
 			key: [0x23],
 			fn: function(arg) { 
-				decoded_data['per_ambient_humidity'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['metadata_report_period'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
-			key: [0x27],
+			key: [0x2A],
 			fn: function(arg) { 
-				decoded_data['per_mcu_temperature'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x28],
-			fn: function(arg) { 
-				decoded_data['per_ext_probe'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x2D],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('probe_varaint')) {
-					decoded_data['probe_varaint'] = {};
-				}
-				var val = decode_field(arg, 1, 7, 7, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['probe_varaint']['input_mode'] = "Digital";
-						break;
-					case 1:
-						decoded_data['probe_varaint']['input_mode'] = "Analog";
-						break;
-					default:
-						decoded_data['probe_varaint']['input_mode'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['probe_varaint']['falling_edge'] = "Disable";
-						break;
-					case 1:
-						decoded_data['probe_varaint']['falling_edge'] = "Enable";
-						break;
-					default:
-						decoded_data['probe_varaint']['falling_edge'] = "Invalid";
-				}}
 				var val = decode_field(arg, 1, 0, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['probe_varaint']['rising_edge'] = "Disable";
+						decoded_data['enabled'] = "Disable";
 						break;
 					case 1:
-						decoded_data['probe_varaint']['rising_edge'] = "Enable";
+						decoded_data['enabled'] = "Enable";
 						break;
 					default:
-						decoded_data['probe_varaint']['rising_edge'] = "Invalid";
+						decoded_data['enabled'] = "Invalid";
 				}}
 				return 1;
 			}
 		},
 		{
-			key: [0x2E],
+			key: [0x2B],
 			fn: function(arg) { 
-				decoded_data['count_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
+				if(!decoded_data.hasOwnProperty('transition_parameters')) {
+					decoded_data['transition_parameters'] = {};
+				}
+				decoded_data['transition_parameters']['gamma'] = decode_field(arg, 2, 15, 8, "unsigned");
+				decoded_data['transition_parameters']['beta'] = decode_field(arg, 2, 7, 4, "unsigned");
+				decoded_data['transition_parameters']['alpha'] = decode_field(arg, 2, 3, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
-			key: [0x2F],
+			key: [0x2C],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('value_to_tx')) {
-					decoded_data['value_to_tx'] = {};
-				}
-				var val = decode_field(arg, 1, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['value_to_tx']['digital_input_count'] = "Disable";
-						break;
-					case 1:
-						decoded_data['value_to_tx']['digital_input_count'] = "Enable";
-						break;
-					default:
-						decoded_data['value_to_tx']['digital_input_count'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['value_to_tx']['digital_input_state'] = "Disable";
-						break;
-					case 1:
-						decoded_data['value_to_tx']['digital_input_state'] = "Enable";
-						break;
-					default:
-						decoded_data['value_to_tx']['digital_input_state'] = "Invalid";
-				}}
+				decoded_data['transition_threshold_period'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
+			}
+		},
+		{
+			key: [0x34],
+			fn: function(arg) { 
+				decoded_data['a0'] = decode_field(arg, 4, 31, 0, "double");
+				return 4;
+			}
+		},
+		{
+			key: [0x35],
+			fn: function(arg) { 
+				decoded_data['a1'] = decode_field(arg, 4, 31, 0, "double");
+				return 4;
+			}
+		},
+		{
+			key: [0x36],
+			fn: function(arg) { 
+				decoded_data['a2'] = decode_field(arg, 4, 31, 0, "double");
+				return 4;
+			}
+		},
+		{
+			key: [0x37],
+			fn: function(arg) { 
+				decoded_data['bt_count_threshold'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x38],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('bt_limits')) {
+					decoded_data['bt_limits'] = {};
+				}
+				decoded_data['bt_limits']['bt_limits_high'] = decode_field(arg, 2, 15, 8, "unsigned");
+				decoded_data['bt_limits']['bt_limits_low'] = decode_field(arg, 2, 7, 0, "unsigned");
+				return 2;
 			}
 		},
 		{
 			key: [0x39],
 			fn: function(arg) { 
-				decoded_data['sample_period_idle_temp'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x3A],
-			fn: function(arg) { 
-				decoded_data['sample_period_active_temp'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
+				decoded_data['bt_ma_len'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
 			}
 		},
 		{
 			key: [0x3B],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('temperature_threshold')) {
-					decoded_data['temperature_threshold'] = {};
-				}
-				decoded_data['temperature_threshold']['low_temp'] = (decode_field(arg, 2, 7, 0, "signed")).toFixed(1);
-				decoded_data['temperature_threshold']['high_temp'] = (decode_field(arg, 2, 15, 8, "signed")).toFixed(1);
-				return 2;
+				decoded_data['rr_window_size'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
 			}
 		},
 		{
 			key: [0x3C],
 			fn: function(arg) { 
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['temperature_threshold_enable'] = "Disable";
-						break;
-					case 1:
-						decoded_data['temperature_threshold_enable'] = "Enable";
-						break;
-					default:
-						decoded_data['temperature_threshold_enable'] = "Invalid";
-				}}
-				return 1;
+				decoded_data['rr_limits_high'] = decode_field(arg, 2, 15, 8, "unsigned");
+				decoded_data['rr_limits_low'] = decode_field(arg, 2, 7, 0, "unsigned");
+				return 2;
 			}
 		},
 		{
 			key: [0x3D],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('rh_threshold')) {
-					decoded_data['rh_threshold'] = {};
-				}
-				decoded_data['rh_threshold']['low_humidity'] = (decode_field(arg, 2, 7, 0, "unsigned")).toFixed(1);
-				decoded_data['rh_threshold']['high_humidity'] = (decode_field(arg, 2, 15, 8, "unsigned")).toFixed(1);
-				return 2;
+				decoded_data['ce_conversion_factor'] = decode_field(arg, 4, 31, 0, "double");
+				return 4;
 			}
 		},
 		{
 			key: [0x3E],
 			fn: function(arg) { 
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['rh_threshold_enable'] = "Disable";
-						break;
-					case 1:
-						decoded_data['rh_threshold_enable'] = "Enable";
-						break;
-					default:
-						decoded_data['rh_threshold_enable'] = "Invalid";
-				}}
+				decoded_data['ce_stat_function'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
 			key: [0x40],
 			fn: function(arg) { 
-				decoded_data['sample_period_idle'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x41],
-			fn: function(arg) { 
-				decoded_data['sample_period_active'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x42],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('threshold')) {
-					decoded_data['threshold'] = {};
+				if(!decoded_data.hasOwnProperty('sensitivity')) {
+					decoded_data['sensitivity'] = {};
 				}
-				decoded_data['threshold']['high_mcu'] = (decode_field(arg, 2, 7, 0, "signed")).toFixed(1);
-				decoded_data['threshold']['low_mc'] = (decode_field(arg, 2, 15, 8, "signed")).toFixed(1);
-				return 2;
-			}
-		},
-		{
-			key: [0x43],
-			fn: function(arg) { 
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
+				var val = decode_field(arg, 1, 2, 0, "unsigned");
 				{switch (val){
-					case 0:
-						decoded_data['threshold_enable'] = "Disable";
-						break;
 					case 1:
-						decoded_data['threshold_enable'] = "Enable";
+						decoded_data['sensitivity']['sample_rate'] = "1 Hz";
+						break;
+					case 2:
+						decoded_data['sensitivity']['sample_rate'] = "10 Hz";
+						break;
+					case 3:
+						decoded_data['sensitivity']['sample_rate'] = "25 Hz";
+						break;
+					case 4:
+						decoded_data['sensitivity']['sample_rate'] = "50 Hz";
+						break;
+					case 5:
+						decoded_data['sensitivity']['sample_rate'] = "100 Hz";
+						break;
+					case 6:
+						decoded_data['sensitivity']['sample_rate'] = "200 Hz";
+						break;
+					case 7:
+						decoded_data['sensitivity']['sample_rate'] = "400 Hz";
 						break;
 					default:
-						decoded_data['threshold_enable'] = "Invalid";
+						decoded_data['sensitivity']['sample_rate'] = "Invalid";
+				}}
+				var val = decode_field(arg, 1, 5, 4, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['sensitivity']['measurement_range'] = "2g";
+						break;
+					case 1:
+						decoded_data['sensitivity']['measurement_range'] = "4g";
+						break;
+					case 2:
+						decoded_data['sensitivity']['measurement_range'] = "8g";
+						break;
+					case 3:
+						decoded_data['sensitivity']['measurement_range'] = "16g";
+						break;
+					default:
+						decoded_data['sensitivity']['measurement_range'] = "Invalid";
 				}}
 				return 1;
-			}
-		},
-		{
-			key: [0x44],
-			fn: function(arg) { 
-				decoded_data['ext_thermistor_sample_period_idle'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x45],
-			fn: function(arg) { 
-				decoded_data['ext_thermistor_sample_period_active'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x46],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('ext_thermistor')) {
-					decoded_data['ext_thermistor'] = {};
-				}
-				decoded_data['ext_thermistor']['ext_thermistor_high_threshold'] = decode_field(arg, 4, 31, 16, "unsigned");
-				decoded_data['ext_thermistor']['ext_thermistor_low_threshold'] = decode_field(arg, 4, 15, 0, "unsigned");
-				return 4;
 			}
 		},
 		{
 			key: [0x4A],
 			fn: function(arg) { 
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['ext_thermistor_threshold_enable'] = "Disable";
-						break;
-					case 1:
-						decoded_data['ext_thermistor_threshold_enable'] = "Enable";
-						break;
-					default:
-						decoded_data['ext_thermistor_threshold_enable'] = "Invalid";
-				}}
+				if(!decoded_data.hasOwnProperty('parameters')) {
+					decoded_data['parameters'] = {};
+				}
+				decoded_data['parameters']['time_percentage'] = decode_field(arg, 1, 7, 4, "unsigned");
+				decoded_data['parameters']['intensity'] = decode_field(arg, 1, 0, 3, "unsigned");
 				return 1;
+			}
+		},
+		{
+			key: [0x50],
+			fn: function(arg) { 
+				decoded_data['r_to_r_window_averaging'] = decode_field(arg, 1, 3, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x51],
+			fn: function(arg) { 
+				decoded_data['r_to_r_gain'] = decode_field(arg, 1, 3, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x52],
+			fn: function(arg) { 
+				decoded_data['r_to_r_peak_averaging_weight_factor'] = decode_field(arg, 1, 1, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x53],
+			fn: function(arg) { 
+				decoded_data['r_to_r_peak_threshold_scaling_factor'] = decode_field(arg, 1, 3, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x54],
+			fn: function(arg) { 
+				decoded_data['r_to_r_minimum_hold_off'] = decode_field(arg, 1, 5, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x55],
+			fn: function(arg) { 
+				decoded_data['r_to_r_interval_averaging_weight_factor'] = decode_field(arg, 1, 1, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x56],
+			fn: function(arg) { 
+				decoded_data['r_to_r_interval_hold_off_scaling_factor'] = decode_field(arg, 1, 2, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x57],
+			fn: function(arg) { 
+				decoded_data['hr_window_size'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x58],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('hr_limits')) {
+					decoded_data['hr_limits'] = {};
+				}
+				decoded_data['hr_limits']['hr_step_limit_m'] = decode_field(arg, 2, 15, 8, "unsigned");
+				decoded_data['hr_limits']['hr_step_limit_s'] = decode_field(arg, 2, 7, 0, "unsigned");
+				return 2;
 			}
 		},
 		{
@@ -575,13 +462,10 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('metadata')) {
 					decoded_data['metadata'] = {};
 				}
-				decoded_data['metadata']['app_major_version'] = decode_field(arg, 7, 55, 48, "unsigned");
-				decoded_data['metadata']['app_minor_version'] = decode_field(arg, 7, 47, 40, "unsigned");
-				decoded_data['metadata']['app_revision'] = decode_field(arg, 7, 39, 32, "unsigned");
-				decoded_data['metadata']['loramac_major_version'] = decode_field(arg, 7, 31, 24, "unsigned");
-				decoded_data['metadata']['loramac_minor_version'] = decode_field(arg, 7, 23, 16, "unsigned");
-				decoded_data['metadata']['loramac_revision'] = decode_field(arg, 7, 15, 8, "unsigned");
-				var val = decode_field(arg, 7, 7, 0, "unsigned");
+				decoded_data['metadata']['app_major_version'] = decode_field(arg, 4, 31, 24, "unsigned");
+				decoded_data['metadata']['app_minor_version'] = decode_field(arg, 4, 23, 16, "unsigned");
+				decoded_data['metadata']['app_revision'] = decode_field(arg, 4, 15, 8, "unsigned");
+				var val = decode_field(arg, 4, 7, 0, "unsigned");
 				{switch (val){
 					case 0:
 						decoded_data['metadata']['region'] = "EU868";
@@ -613,7 +497,29 @@ if (input.fPort === 100) {
 					default:
 						decoded_data['metadata']['region'] = "Invalid";
 				}}
-				return 7;
+				return 4;
+			}
+		},
+	];
+}
+if (input.fPort === 10) {
+	decoder = [
+		{
+			key: [],
+			fn: function(arg) { 
+				decoded_data['battery'] = (decode_field(arg, 9, 71, 64, "unsigned") * 0.391304348 + 0.608695652).toFixed(2);
+				decoded_data['body_temperature'] = (decode_field(arg, 9, 63, 56, "unsigned") * 0.05 + 30).toFixed(2);
+				decoded_data['respiratory_rate'] = decode_field(arg, 9, 55, 48, "unsigned");
+				decoded_data['ua_mode_active'] = decode_field(arg, 9, 47, 47, "unsigned");
+				decoded_data['rest_mode_status'] = decode_field(arg, 9, 46, 46, "unsigned");
+				decoded_data['ce'] = decode_field(arg, 9, 43, 40, "unsigned");
+				decoded_data['csc'] = decode_field(arg, 9, 39, 32, "unsigned");
+				decoded_data['af'] = decode_field(arg, 9, 31, 31, "unsigned");
+				decoded_data['position'] = decode_field(arg, 9, 30, 24, "unsigned");
+				decoded_data['heart_rate'] = decode_field(arg, 9, 23, 16, "unsigned");
+				decoded_data['body_temperature_2'] = decode_field(arg, 9, 15, 8, "unsigned");
+				decoded_data['af_2'] = decode_field(arg, 9, 7, 0, "unsigned");
+				return 9;
 			}
 		},
 	];
@@ -768,4 +674,4 @@ if (input.fPort === 100) {
     }
 
     return output;
-}
+//}

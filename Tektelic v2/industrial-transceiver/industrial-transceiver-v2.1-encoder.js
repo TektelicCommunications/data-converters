@@ -1,4 +1,4 @@
-function encodeDownlink(input) {
+//function encodeDownlink(input) {
    var sensor = 
 {
     "lorawan": {
@@ -1508,4 +1508,4 @@ function encodeDownlink(input) {
     }
 
     return encode(input, sensor);
-}
+//}

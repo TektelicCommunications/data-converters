@@ -1,4 +1,4 @@
-function decodeUplink(input) {
+//function decodeUplink(input) {
     var bytes = input.bytes;
     var port = input.fPort;
 
@@ -365,4 +365,4 @@ function decodeUplink(input) {
     warnings: [],
     errors: []
   };
-}
+//}

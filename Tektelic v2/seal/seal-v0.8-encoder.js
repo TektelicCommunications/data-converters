@@ -1,4 +1,4 @@
-function decodeDownlink(input) {
+//function decodeDownlink(input) {
 
 var sensor = 
 {
@@ -2195,4 +2195,4 @@ return {
     warnings: [],
     errors: []
   }
-}
+//}

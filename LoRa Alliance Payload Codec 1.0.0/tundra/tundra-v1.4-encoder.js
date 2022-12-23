@@ -1,4 +1,4 @@
-//function encodeDownlink(input) {
+function encodeDownlink(input) {
    var sensor = 
 {
     "deep_sleep": {
@@ -1293,4 +1293,4 @@
     }
 
     return encode(input, sensor);
-//}
+}
