@@ -756,49 +756,14 @@ if (port === 10) {
 		{
 			key: [0x01, 0x04],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				var output = 0;
-				if (val > 2781){
-					output = "Dry";
-				} else if (val > 2776 && val <= 2781){
-					output = 0.1;
-				} else if (val > 2771 && val <= 2776){
-					output = 0.2;
-				} else if (val > 2766 && val <= 2771){
-					output = 0.3;
-				} else if (val > 2761 && val <= 2766){
-					output = 0.4;
-				} else if (val > 2756 && val <= 2761){
-					output = 0.5;
-				} else if (val > 2751 && val <= 2756){
-					output = 0.6;
-				} else if (val > 2746 && val <= 2751){
-					output = 0.7;
-				} else if (val > 2741 && val <= 2746){
-					output = 0.8;
-				} else if (val > 2736 && val <= 2741){
-					output = 0.9;
-				} else if (val > 2731 && val <= 2736){
-					output = 1.0;
-				} else if (val > 2726 && val <= 2731){
-					output = 1.1;
-				} else if (val > 2721 && val <= 2726){
-					output = 1.2;
-				} else {
-					output = "Wet";
-				}
-				decoded_data['soil_moisture'] = output;
-				decoded_data['soil_moisture_raw'] = val;
+				decoded_data['input1_frequency'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x02, 0x02],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				var output = 2.39e-5 * Math.pow(val, 2) - 0.1011 * val + 77.34;
-				decoded_data['soil_temperature'] = output;
-				decoded_data['soil_temperature_raw'] = val;
+				decoded_data['input2_voltage'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
 				return 2;
 			}
 		},
@@ -807,8 +772,7 @@ if (port === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				decoded_data['Input3_voltage'] = val;
-				decoded_data['Input3_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input3_voltage_temp'] = (-31.96 * Math.log(val)) + 213.25;
 				return 2;
 			}
 		},
@@ -824,8 +788,7 @@ if (port === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				decoded_data['Input4_voltage'] = val;
-				decoded_data['Input4_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input4_voltage_temp'] = (-31.96 * Math.log(val)) + 213.25;
 				return 2;
 			}
 		},
@@ -839,15 +802,79 @@ if (port === 10) {
 		{
 			key: [0x05, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark1_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				{switch (val){
+					case (val > 6430):
+						output = 0;
+						break;
+					case (val >= 4330 && val <= 6430):
+						output = 9.000 - (val - 4330.000) * 0.004286;
+						break;
+					case (val >= 2820 && val < 4330):
+						output = 15.000 - (val - 2820.000) * 0.003974;
+						break;
+					case (val >= 1110 && val < 2820):
+						output = 35.000 - (val - 1110.000) * 0.01170;
+						break;
+					case (val >= 770 && val < 1110):
+						output = 55.000 - (val - 770.000) * 0.05884;
+						break;
+					case (val >= 600 && val < 770):
+						output = 75.000 - (val - 600.000) * 0.1176;
+						break;
+					case (val >= 485 && val < 600):
+						output = 100.000 - (val - 485.000) * 0.2174;
+						break;
+					case (val >= 293 && val < 485):
+						output = 200.000 - (val - 293.000) * 0.5208;
+						break;
+					default:
+						output = 200;
+					
+					decoded_data['watermark2_tension'] = output;
+					return 2;
+					}
+				}
 			}
 		},
 		{
 			key: [0x06, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark2_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				{switch (val){
+					case (val > 6430):
+						output = 0;
+						break;
+					case (val >= 4330 && val <= 6430):
+						output = 9.000 - (val - 4330.000) * 0.004286;
+						break;
+					case (val >= 2820 && val < 4330):
+						output = 15.000 - (val - 2820.000) * 0.003974;
+						break;
+					case (val >= 1110 && val < 2820):
+						output = 35.000 - (val - 1110.000) * 0.01170;
+						break;
+					case (val >= 770 && val < 1110):
+						output = 55.000 - (val - 770.000) * 0.05884;
+						break;
+					case (val >= 600 && val < 770):
+						output = 75.000 - (val - 600.000) * 0.1176;
+						break;
+					case (val >= 485 && val < 600):
+						output = 100.000 - (val - 485.000) * 0.2174;
+						break;
+					case (val >= 293 && val < 485):
+						output = 200.000 - (val - 293.000) * 0.5208;
+						break;
+					default:
+						output = 200;
+		
+					decoded_data['watermark2_tension'] = output;
+					return 2;
+					}
+				}
 			}
 		},
 		{

@@ -758,31 +758,31 @@ if (port === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				var output = 0;
-				if (val > 2781){
+				if (val > 1399){
 					output = "Dry";
-				} else if (val > 2776 && val <= 2781){
+				} else if (val > 1396 && val <= 1399){
 					output = 0.1;
-				} else if (val > 2771 && val <= 2776){
+				} else if (val > 1391 && val <= 1396){
 					output = 0.2;
-				} else if (val > 2766 && val <= 2771){
+				} else if (val > 1386 && val <= 1391){
 					output = 0.3;
-				} else if (val > 2761 && val <= 2766){
+				} else if (val > 1381 && val <= 1386){
 					output = 0.4;
-				} else if (val > 2756 && val <= 2761){
+				} else if (val > 1376 && val <= 1381){
 					output = 0.5;
-				} else if (val > 2751 && val <= 2756){
+				} else if (val > 1371 && val <= 1376){
 					output = 0.6;
-				} else if (val > 2746 && val <= 2751){
+				} else if (val > 1366 && val <= 1371){
 					output = 0.7;
-				} else if (val > 2741 && val <= 2746){
+				} else if (val > 1361 && val <= 1366){
 					output = 0.8;
-				} else if (val > 2736 && val <= 2741){
+				} else if (val > 1356 && val <= 1361){
 					output = 0.9;
-				} else if (val > 2731 && val <= 2736){
+				} else if (val > 1351 && val <= 1356){
 					output = 1.0;
-				} else if (val > 2726 && val <= 2731){
+				} else if (val > 1346 && val <= 1351){
 					output = 1.1;
-				} else if (val > 2721 && val <= 2726){
+				} else if (val > 1341 && val <= 1346){
 					output = 1.2;
 				} else {
 					output = "Wet";
@@ -796,7 +796,7 @@ if (port === 10) {
 			key: [0x02, 0x02],
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				var output = 2.39e-5 * Math.pow(val, 2) - 0.1011 * val + 77.34;
+				var output = (-32.46 * Math.log(val)) + 236.36
 				decoded_data['soil_temperature'] = output;
 				decoded_data['soil_temperature_raw'] = val;
 				return 2;

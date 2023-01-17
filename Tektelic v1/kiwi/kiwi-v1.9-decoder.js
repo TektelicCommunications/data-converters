@@ -739,7 +739,7 @@ if (port === 10) {
 				if(!decoded_data.hasOwnProperty('battery_status')) {
 					decoded_data['battery_status'] = {};
 				}
-				decoded_data['battery_status']['rem_batt_capacity'] = (decode_field(arg, 1, 6, 0, "unsigned") * 0.01 + 2.5).toFixed(2);
+				decoded_data['battery_status']['rem_batt_capacity'] = decode_field(arg, 1, 6, 0, "unsigned");
 				return 1;
 			}
 		},
@@ -756,7 +756,7 @@ if (port === 10) {
 		{
 			key: [0x01, 0x04],
 			fn: function(arg) { 
-				decoded_data['input1_frequency'] = decode_field(arg, 2, 15, 0, "unsigned") * 1000;
+				decoded_data['input1_frequency'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
@@ -770,32 +770,34 @@ if (port === 10) {
 		{
 			key: [0x03, 0x02],
 			fn: function(arg) { 
-				decoded_data['Input3_voltage'] = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['Input3_voltage'] = val;
+				decoded_data['Input3_voltage_temp'] = (-4.741e-8 * Math.pow(val, 3)) + (0.000154 * Math.pow(val, 2)) 
+				+ (-0.1914 * val) + 80.74;
 				return 2;
 			}
 		},
 		{
 			key: [0x03, 0x67],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "signed");
-				var output = (3.413e-7 * Math.pow(val, 4)) - (-0.0001843 * Math.pow(val, 3)) + (0.03493 * Math.pow(val, 2)) - (-3.017 * val) + 98.5;
-				decoded_data['Input3_temperature'] = output;
+				decoded_data['Input3_temperature'] = (decode_field(arg, 2, 15, 0, "signed")*0.1).toFixed(1);
 				return 2;
 			}
 		},
 		{
 			key: [0x04, 0x02],
 			fn: function(arg) { 
-				decoded_data['Input4_voltage'] = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['Input4_voltage'] = val;
+				decoded_data['Input4_voltage_temp'] = (-4.741e-8 * Math.pow(val, 3)) + (0.000154 * Math.pow(val, 2)) 
+				+ (-0.1914 * val) + 80.74;
 				return 2;
 			}
 		},
 		{
 			key: [0x04, 0x67],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "signed");
-				var output =  (3.413e-7 * Math.pow(val, 4)) - (-0.0001843 * Math.pow(val, 3)) + (0.03493 * Math.pow(val, 2)) - (-3.017 * val) + 98.5;
-				decoded_data['Input4_temperature'] = output;
+				decoded_data['Input4_temperature'] = (decode_field(arg, 2, 15, 0, "signed")*0.1).toFixed(1);
 				return 2;
 			}
 		},
@@ -832,7 +834,8 @@ if (port === 10) {
 					default:
 						output = 200;
 					
-					decoded_data['watermark2_tension'] = output;
+					decoded_data['watermark1_tension'] = output;
+					decoded_data['watermark1'] = val;
 					return 2;
 					}
 				}
@@ -872,6 +875,7 @@ if (port === 10) {
 						output = 200;
 		
 					decoded_data['watermark2_tension'] = output;
+					decoded_data['watermark2'] = val;
 					return 2;
 					}
 				}
@@ -916,7 +920,7 @@ if (port === 10) {
 		{
 			key: [0x0A, 0x00],
 			fn: function(arg) { 
-				var val = decode_field(arg, 1, 7, 0, "signed");
+				var val = decode_field(arg, 1, 7, 0, "unsigned");
 				{switch (val){
 					case 0:
 						decoded_data['orientation_alarm'] = "No Alarm";
@@ -954,7 +958,7 @@ if (port === 10) {
 		{
 			key: [0x0D, 0x73],
 			fn: function(arg) { 
-				decoded_data['barometric_pressure'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['barometric_pressure'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.1).toFixed(1);
 				return 2;
 			}
 		},
