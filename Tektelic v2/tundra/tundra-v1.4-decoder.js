@@ -782,12 +782,11 @@ if (input.fPort === 100) {
 	}
 
     var output = {
-        "data": decoded_data
+        "data": decoded_data,
+		"errors": errors,
+		"warnings": [],
+		"tektelicMetadata": input.tektelicMetadata
     };
-
-    if (errors.length > 0) {
-        output.errors = errors;
-    }
-
+	
     return output;
 //}

@@ -1,44 +1,12 @@
-//function decodeUplink(input){
+//DCG: v1.0.0
 
-	var decoded_data = {};
-	var decoder = [];
-	var errors = [];
-	var bytes = convertToUint8Array(input.bytes);
-	decoded_data['raw'] = toHexString(bytes).toUpperCase();
-	decoded_data['fPort'] = input.fPort;
+var decoded_data = {};
+var decoder = [];
+bytes = convertToUint8Array(bytes);
+decoded_data['raw'] = toHexString(bytes).toUpperCase();
+decoded_data['port'] = port;
 
-if(input.fPort === 101){
-	decoder = [
-		{
-			key: [],
-			fn: function(arg) { 
-				var size = arg.length;
-				var invalid_registers = [];
-				var responses = [];
-				while(arg.length > 0){
-					const downlink_fcnt = arg[0];
-					const num_invalid_writes = arg[1];
-					arg = arg.slice(2);
-					if(num_invalid_writes > 0) {
-						for(var i = 0; i < num_invalid_writes; i++){
-							invalid_registers.push("0x" + arg[i].toString(16));
-						}
-						arg = arg.slice(num_invalid_writes);
-						responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
-					}
-					else {
-						responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
-					}
-					invalid_registers = [];
-				}
-				decoded_data["response"] = responses;
-				return size;
-			}
-		}
-	];
-}
-
-if (input.fPort === 100) {
+if (port === 100) {
 	decoder = [
 		{
 			key: [0x10],
@@ -763,7 +731,7 @@ if (input.fPort === 100) {
 		},
 	];
 }
-if (input.fPort === 10) {
+if (port === 10) {
 	decoder = [
 		{
 			key: [0x00, 0xD3],
@@ -788,49 +756,14 @@ if (input.fPort === 10) {
 		{
 			key: [0x01, 0x04],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				var output = 0;
-				if (val > 2781){
-					output = "Dry";
-				} else if (val > 2776 && val <= 2781){
-					output = 0.1;
-				} else if (val > 2771 && val <= 2776){
-					output = 0.2;
-				} else if (val > 2766 && val <= 2771){
-					output = 0.3;
-				} else if (val > 2761 && val <= 2766){
-					output = 0.4;
-				} else if (val > 2756 && val <= 2761){
-					output = 0.5;
-				} else if (val > 2751 && val <= 2756){
-					output = 0.6;
-				} else if (val > 2746 && val <= 2751){
-					output = 0.7;
-				} else if (val > 2741 && val <= 2746){
-					output = 0.8;
-				} else if (val > 2736 && val <= 2741){
-					output = 0.9;
-				} else if (val > 2731 && val <= 2736){
-					output = 1.0;
-				} else if (val > 2726 && val <= 2731){
-					output = 1.1;
-				} else if (val > 2721 && val <= 2726){
-					output = 1.2;
-				} else {
-					output = "Wet";
-				}
-				decoded_data['soil_moisture'] = output;
-				decoded_data['soil_moisture_raw'] = val;
+				decoded_data['input1_frequency'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x02, 0x02],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				var output = 2.39e-5 * Math.pow(val, 2) - 0.1011 * val + 77.34;
-				decoded_data['soil_temperature'] = output;
-				decoded_data['soil_temperature_raw'] = val;
+				decoded_data['input2_voltage'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
 				return 2;
 			}
 		},
@@ -839,8 +772,7 @@ if (input.fPort === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				decoded_data['Input3_voltage'] = val;
-				decoded_data['Input3_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input3_voltage_temp'] = (-31.96 * Math.log(val)) + 213.25;
 				return 2;
 			}
 		},
@@ -856,8 +788,7 @@ if (input.fPort === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				decoded_data['Input4_voltage'] = val;
-				decoded_data['Input4_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input4_voltage_temp'] = (-31.96 * Math.log(val)) + 213.25;
 				return 2;
 			}
 		},
@@ -871,15 +802,79 @@ if (input.fPort === 10) {
 		{
 			key: [0x05, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark1_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				{switch (val){
+					case (val > 6430):
+						output = 0;
+						break;
+					case (val >= 4330 && val <= 6430):
+						output = 9.000 - (val - 4330.000) * 0.004286;
+						break;
+					case (val >= 2820 && val < 4330):
+						output = 15.000 - (val - 2820.000) * 0.003974;
+						break;
+					case (val >= 1110 && val < 2820):
+						output = 35.000 - (val - 1110.000) * 0.01170;
+						break;
+					case (val >= 770 && val < 1110):
+						output = 55.000 - (val - 770.000) * 0.05884;
+						break;
+					case (val >= 600 && val < 770):
+						output = 75.000 - (val - 600.000) * 0.1176;
+						break;
+					case (val >= 485 && val < 600):
+						output = 100.000 - (val - 485.000) * 0.2174;
+						break;
+					case (val >= 293 && val < 485):
+						output = 200.000 - (val - 293.000) * 0.5208;
+						break;
+					default:
+						output = 200;
+					
+					decoded_data['watermark2_tension'] = output;
+					return 2;
+					}
+				}
 			}
 		},
 		{
 			key: [0x06, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark2_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				{switch (val){
+					case (val > 6430):
+						output = 0;
+						break;
+					case (val >= 4330 && val <= 6430):
+						output = 9.000 - (val - 4330.000) * 0.004286;
+						break;
+					case (val >= 2820 && val < 4330):
+						output = 15.000 - (val - 2820.000) * 0.003974;
+						break;
+					case (val >= 1110 && val < 2820):
+						output = 35.000 - (val - 1110.000) * 0.01170;
+						break;
+					case (val >= 770 && val < 1110):
+						output = 55.000 - (val - 770.000) * 0.05884;
+						break;
+					case (val >= 600 && val < 770):
+						output = 75.000 - (val - 600.000) * 0.1176;
+						break;
+					case (val >= 485 && val < 600):
+						output = 100.000 - (val - 485.000) * 0.2174;
+						break;
+					case (val >= 293 && val < 485):
+						output = 200.000 - (val - 293.000) * 0.5208;
+						break;
+					default:
+						output = 200;
+		
+					decoded_data['watermark2_tension'] = output;
+					return 2;
+					}
+				}
 			}
 		},
 		{
@@ -985,12 +980,12 @@ if (input.fPort === 10) {
 				}
 			}
 			if (!found) {
-				errors.push("Unable to decode header " + toHexString(header).toUpperCase());
-				break;
+				decoded_data['error'] = "Unable to decode header " + toHexString(item.key).toUpperCase();
+				return decoded_data;
 			}
 		}
 	} catch (error) {
-		errors = "Fatal decoder error";
+		decoded_data['error'] = "Fatal decoder error";
 	}
 
 	function slice(a, f, t) {
@@ -1001,51 +996,34 @@ if (input.fPort === 10) {
 		return res;
 	}
 
-	// Extracts bits from a byte array
-	function extract_bytes(chunk, startBit, endBit) {
-		var array = new Array(0);
-		var totalBits = startBit - endBit + 1;
-		var totalBytes = Math.ceil(totalBits / 8);
-		var endBits = 0;
-		var startBits = 0;
-		for (var i = 0; i < totalBytes; i++) {
-			if(totalBits > 8) {
-				endBits = endBit;
-				startBits = endBits + 7;
-				endBit = endBit + 8;
-				totalBits -= 8;
-			} else {
-				endBits = endBit;
-				startBits = endBits + totalBits - 1;
-				totalBits = 0;
-			}
-			var endChunk = chunk.length - Math.ceil((endBits + 1) / 8);
-			var startChunk = chunk.length - Math.ceil((startBits + 1) / 8);
-			var word = 0x0;
-			if (startChunk == endChunk){
-				var endOffset = endBits % 8;
-				var startOffset = startBits % 8;
-				var mask = 0xFF >> (8 - (startOffset - endOffset + 1));
-				word = (chunk[startChunk] >> endOffset) & mask;
-				array.unshift(word);
-			} else {
-				var endChunkEndOffset = endBits % 8;
-				var endChunkStartOffset = 7;
-				var endChunkMask = 0xFF >> (8 - (endChunkStartOffset - endChunkEndOffset + 1));
-				var endChunkWord = (chunk[endChunk] >> endChunkEndOffset) & endChunkMask;
-				var startChunkEndOffset = 0;
-				var startChunkStartOffset = startBits % 8;
-				var startChunkMask = 0xFF >> (8 - (startChunkStartOffset - startChunkEndOffset + 1));
-				var startChunkWord = (chunk[startChunk] >> startChunkEndOffset) & startChunkMask;
-				var startChunkWordShifted = startChunkWord << (endChunkStartOffset - endChunkEndOffset + 1);
-				word = endChunkWord | startChunkWordShifted;
-				array.unshift(word);
-			}
-		}
-		return array;
+	function trunc(v){
+		v = +v;
+		if (!isFinite(v)) return v;
+		return (v - v % 1)   ||   (v < 0 ? -0 : v === 0 ? v : 0);
 	}
 
-	// Applies data type to a byte array
+	// Extracts bits from a byte array
+	function extract_bytes(chunk, startBit, endBit) {
+		var totalBits = startBit - endBit + 1;
+		var totalBytes = totalBits % 8 === 0 ? to_uint(totalBits / 8) : to_uint(totalBits / 8) + 1;
+		var bitOffset = endBit % 8;
+		var arr = new Array(totalBytes);
+		for (var byte = totalBytes-1; byte >= 0; byte--) {
+			var chunkIndex = byte + (chunk.length - 1 - trunc(startBit / 8));
+			var lo = chunk[chunkIndex] >> bitOffset;
+			var hi = 0;
+			if (byte !== 0) {
+				var hi_bitmask = (1 << bitOffset) - 1
+				var bits_to_take_from_hi = 8 - bitOffset
+				hi = (chunk[chunkIndex - 1] & (hi_bitmask << bits_to_take_from_hi));
+			} else {
+				lo = lo & ((1 << (totalBits % 8 ? totalBits % 8 : 8)) - 1);
+			}
+			arr[byte] = hi | lo;
+		}
+		return arr;
+	}
+
 	function apply_data_type(bytes, data_type) {
 		var output = 0;
 		if (data_type === "unsigned") {
@@ -1122,13 +1100,4 @@ if (input.fPort === 10) {
 		}
 		return arr;
 	}
-
-    var output = {
-        "data": decoded_data,
-		"errors": errors,
-		"warnings": [],
-		"tektelicMetadata": input.tektelicMetadata
-    };
-
-    return output;
-//}
+	return decoded_data;
