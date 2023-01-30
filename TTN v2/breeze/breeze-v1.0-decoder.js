@@ -11,620 +11,32 @@ if (port === 101) {
 		{
 			key: [0x10],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 15, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['loramac_join_mode_error'] = "ABP";
-						break;
-					case 1:
-						decoded_data['loramac_join_mode_error'] = "OTAA";
-						break;
-					default:
-						decoded_data['loramac_join_mode_error'] = "Invalid";
-				}}
-				return 2;
-			}
-		},
-		{
-			key: [0x11],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('loramac_opts_error')) {
-					decoded_data['loramac_opts_error'] = {};
+					var size = arg.length;
+					var invalid_registers = [];
+					var responses = [];
+					while(arg.length > 0){
+						const downlink_fcnt = arg[0];
+						const num_invalid_writes = arg[1];
+						arg = arg.slice(2);
+						if(num_invalid_writes > 0) {
+							for(var i = 0; i < num_invalid_writes; i++){
+								invalid_registers.push("0x" + arg[i].toString(16));
+							}
+							arg = arg.slice(num_invalid_writes);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+						}
+						else {
+							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+						}
+						invalid_registers = [];
+					}
+					decoded_data["response"] = responses;
+					return size;
 				}
-				var val = decode_field(arg, 2, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['loramac_opts_error']['loramac_ul_type_error'] = "Unconfirmed";
-						break;
-					case 1:
-						decoded_data['loramac_opts_error']['loramac_ul_type_error'] = "Confirmed";
-						break;
-					default:
-						decoded_data['loramac_opts_error']['loramac_ul_type_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 2, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['loramac_opts_error']['loramac_sync_word_error'] = "Private";
-						break;
-					case 1:
-						decoded_data['loramac_opts_error']['loramac_sync_word_error'] = "Public";
-						break;
-					default:
-						decoded_data['loramac_opts_error']['loramac_sync_word_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 2, 2, 2, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['loramac_opts_error']['loramac_duty_cycle_error'] = "Disable";
-						break;
-					case 1:
-						decoded_data['loramac_opts_error']['loramac_duty_cycle_error'] = "Enable";
-						break;
-					default:
-						decoded_data['loramac_opts_error']['loramac_duty_cycle_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 2, 3, 3, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['loramac_opts_error']['loramac_adr_error'] = "Disable";
-						break;
-					case 1:
-						decoded_data['loramac_opts_error']['loramac_adr_error'] = "Enable";
-						break;
-					default:
-						decoded_data['loramac_opts_error']['loramac_adr_error'] = "Invalid";
-				}}
-				return 2;
 			}
-		},
-		{
-			key: [0x12],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('loramac_dr_tx_error')) {
-					decoded_data['loramac_dr_tx_error'] = {};
-				}
-				decoded_data['loramac_dr_tx_error']['loramac_default_tx_pwr_error'] = decode_field(arg, 2, 3, 0, "unsigned");
-				decoded_data['loramac_dr_tx_error']['loramac_default_dr_error'] = decode_field(arg, 2, 11, 8, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x13],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('loramac_rx2_error')) {
-					decoded_data['loramac_rx2_error'] = {};
-				}
-				decoded_data['loramac_rx2_error']['loramac_rx2_dr_error'] = decode_field(arg, 5, 7, 0, "unsigned");
-				decoded_data['loramac_rx2_error']['loramac_rx2_freq_error'] = decode_field(arg, 5, 39, 8, "unsigned");
-				return 5;
-			}
-		},
-		{
-			key: [0x19],
-			fn: function(arg) { 
-				decoded_data['loramac_net_id_msb_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x1A],
-			fn: function(arg) { 
-				decoded_data['loramac_net_id_lsb_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x20],
-			fn: function(arg) { 
-				decoded_data['seconds_per_core_tick_error'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x21],
-			fn: function(arg) { 
-				decoded_data['ticks_battery_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x22],
-			fn: function(arg) { 
-				decoded_data['ticks_temp_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x23],
-			fn: function(arg) { 
-				decoded_data['ticks_rh_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x26],
-			fn: function(arg) { 
-				decoded_data['ticks_co2_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x27],
-			fn: function(arg) { 
-				decoded_data['ticks_pressure_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x28],
-			fn: function(arg) { 
-				decoded_data['ticks_motion_pir_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x38],
-			fn: function(arg) { 
-				decoded_data['pressure_iir_recall_factor_error'] = decode_field(arg, 1, 4, 0, "unsigned");
-				return 1;
-			}
-		},
-		{
-			key: [0x39],
-			fn: function(arg) { 
-				decoded_data['temp_rh_sample_period_idle_error'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x3A],
-			fn: function(arg) { 
-				decoded_data['temp_rh_sample_period_active_error'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x3B],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('temp_thresholds_error')) {
-					decoded_data['temp_thresholds_error'] = {};
-				}
-				decoded_data['temp_thresholds_error']['temp_threshold_low_error'] = (decode_field(arg, 2, 7, 0, "signed")).toFixed(1);
-				decoded_data['temp_thresholds_error']['temp_threshold_high_error'] = (decode_field(arg, 2, 15, 8, "signed")).toFixed(1);
-				return 2;
-			}
-		},
-		{
-			key: [0x3C],
-			fn: function(arg) { 
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['temp_thresholds_enabled_error'] = "Disable";
-						break;
-					case 1:
-						decoded_data['temp_thresholds_enabled_error'] = "Enable";
-						break;
-					default:
-						decoded_data['temp_thresholds_enabled_error'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x3D],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('rh_threshold_error')) {
-					decoded_data['rh_threshold_error'] = {};
-				}
-				decoded_data['rh_threshold_error']['rh_threshold_low_error'] = (decode_field(arg, 2, 7, 0, "unsigned")).toFixed(1);
-				decoded_data['rh_threshold_error']['rh_threshold_high_error'] = (decode_field(arg, 2, 15, 8, "unsigned")).toFixed(1);
-				return 2;
-			}
-		},
-		{
-			key: [0x3E],
-			fn: function(arg) { 
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['rh_thresholds_enabled_error'] = "Disable";
-						break;
-					case 1:
-						decoded_data['rh_thresholds_enabled_error'] = "Enable";
-						break;
-					default:
-						decoded_data['rh_thresholds_enabled_error'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x40],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('battery_report_options_error')) {
-					decoded_data['battery_report_options_error'] = {};
-				}
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['battery_report_options_error']['battery_voltage_reported_error'] = "Not Reported";
-						break;
-					case 1:
-						decoded_data['battery_report_options_error']['battery_voltage_reported_error'] = "Reported";
-						break;
-					default:
-						decoded_data['battery_report_options_error']['battery_voltage_reported_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['battery_report_options_error']['battery_capacity_sensor_reported_error'] = "Not Reported";
-						break;
-					case 1:
-						decoded_data['battery_report_options_error']['battery_capacity_sensor_reported_error'] = "Reported";
-						break;
-					default:
-						decoded_data['battery_report_options_error']['battery_capacity_sensor_reported_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 2, 2, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['battery_report_options_error']['battery_capacity_display_reported_error'] = "Not Reported";
-						break;
-					case 1:
-						decoded_data['battery_report_options_error']['battery_capacity_display_reported_error'] = "Reported";
-						break;
-					default:
-						decoded_data['battery_report_options_error']['battery_capacity_display_reported_error'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x50],
-			fn: function(arg) { 
-				decoded_data['pir_grace_period_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x51],
-			fn: function(arg) { 
-				decoded_data['pir_threshold_count_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x52],
-			fn: function(arg) { 
-				decoded_data['pir_threshold_period_error'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x53],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('mode_error')) {
-					decoded_data['mode_error'] = {};
-				}
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['mode_error']['pir_motion_count_reported_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['mode_error']['pir_motion_count_reported_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['mode_error']['pir_motion_count_reported_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['mode_error']['pir_motion_state_reported_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['mode_error']['pir_motion_state_reported_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['mode_error']['pir_motion_state_reported_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 6, 6, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['mode_error']['pir_event_based_reporting_enabled_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['mode_error']['pir_event_based_reporting_enabled_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['mode_error']['pir_event_based_reporting_enabled_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 7, 7, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['mode_error']['sensor_enable_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['mode_error']['sensor_enable_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['mode_error']['sensor_enable_error'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x54],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('hold_off_intervals_error')) {
-					decoded_data['hold_off_intervals_error'] = {};
-				}
-				decoded_data['hold_off_intervals_error']['post_turn_on_hold_off_error'] = decode_field(arg, 2, 15, 8, "unsigned");
-				decoded_data['hold_off_intervals_error']['post_disturbance_hold_off_error'] = decode_field(arg, 2, 7, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x66],
-			fn: function(arg) { 
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['drm_enabled_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['drm_enabled_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['drm_enabled_error'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x67],
-			fn: function(arg) { 
-				decoded_data['drm_request_update_period_error'] = decode_field(arg, 1, 7, 4, "unsigned");
-				return 1;
-			}
-		},
-		{
-			key: [0x68],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('active_hours_error')) {
-					decoded_data['active_hours_error'] = {};
-				}
-				decoded_data['active_hours_error']['drm_active_start_hr_error'] = decode_field(arg, 3, 23, 16, "unsigned");
-				decoded_data['active_hours_error']['drm_active_end_hr_error'] = decode_field(arg, 3, 15, 8, "unsigned");
-				var val = decode_field(arg, 3, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['active_hours_error']['drm_active_on_sunday_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['active_hours_error']['drm_active_on_sunday_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['active_hours_error']['drm_active_on_sunday_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 3, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['active_hours_error']['drm_active_on_monday_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['active_hours_error']['drm_active_on_monday_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['active_hours_error']['drm_active_on_monday_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 3, 2, 2, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['active_hours_error']['drm_active_on_tuesday_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['active_hours_error']['drm_active_on_tuesday_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['active_hours_error']['drm_active_on_tuesday_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 3, 3, 3, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['active_hours_error']['drm_active_on_wednesday_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['active_hours_error']['drm_active_on_wednesday_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['active_hours_error']['drm_active_on_wednesday_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 3, 4, 4, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['active_hours_error']['drm_active_on_thursday_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['active_hours_error']['drm_active_on_thursday_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['active_hours_error']['drm_active_on_thursday_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 3, 5, 5, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['active_hours_error']['drm_active_on_friday_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['active_hours_error']['drm_active_on_friday_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['active_hours_error']['drm_active_on_friday_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 3, 6, 6, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['active_hours_error']['drm_active_on_saturday_error'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['active_hours_error']['drm_active_on_saturday_error'] = "Enabled";
-						break;
-					default:
-						decoded_data['active_hours_error']['drm_active_on_saturday_error'] = "Invalid";
-				}}
-				return 3;
-			}
-		},
-		{
-			key: [0x69],
-			fn: function(arg) { 
-				decoded_data['seconds_per_core_tick_inactive_error'] = decode_field(arg, 4, 31, 0, "unsigned");
-				return 4;
-			}
-		},
-		{
-			key: [0x6A],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('co2_sampling_parameters_error')) {
-					decoded_data['co2_sampling_parameters_error'] = {};
-				}
-				decoded_data['co2_sampling_parameters_error']['co2_sample_period_inactive_error'] = decode_field(arg, 3, 23, 8, "unsigned");
-				decoded_data['co2_sampling_parameters_error']['co2_num_subsample_inactive_error'] = decode_field(arg, 3, 7, 0, "unsigned");
-				return 3;
-			}
-		},
-		{
-			key: [0x6F],
-			fn: function(arg) { 
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['response_format_error'] = "Invalid write response format";
-						break;
-					case 1:
-						decoded_data['response_format_error'] = "4-byte CRC";
-						break;
-					default:
-						decoded_data['response_format_error'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x70],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('write_to_flash_error')) {
-					decoded_data['write_to_flash_error'] = {};
-				}
-				var val = decode_field(arg, 2, 13, 13, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['write_to_flash_error']['app_configuration_error'] = "De-asserted";
-						break;
-					case 1:
-						decoded_data['write_to_flash_error']['app_configuration_error'] = "Asserted";
-						break;
-					default:
-						decoded_data['write_to_flash_error']['app_configuration_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 2, 14, 14, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['write_to_flash_error']['lora_configuration_error'] = "De-asserted";
-						break;
-					case 1:
-						decoded_data['write_to_flash_error']['lora_configuration_error'] = "Asserted";
-						break;
-					default:
-						decoded_data['write_to_flash_error']['lora_configuration_error'] = "Invalid";
-				}}
-				var val = decode_field(arg, 2, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['write_to_flash_error']['restart_sensor_error'] = "De-asserted";
-						break;
-					case 1:
-						decoded_data['write_to_flash_error']['restart_sensor_error'] = "Asserted";
-						break;
-					default:
-						decoded_data['write_to_flash_error']['restart_sensor_error'] = "Invalid";
-				}}
-				return 2;
-			}
-		},
-		{
-			key: [0x71],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('metadata_error')) {
-					decoded_data['metadata_error'] = {};
-				}
-				decoded_data['metadata_error']['app_major_version_error'] = decode_field(arg, 7, 55, 48, "unsigned");
-				decoded_data['metadata_error']['app_minor_version_error'] = decode_field(arg, 7, 47, 40, "unsigned");
-				decoded_data['metadata_error']['app_revision_error'] = decode_field(arg, 7, 39, 32, "unsigned");
-				decoded_data['metadata_error']['loramac_major_version_error'] = decode_field(arg, 7, 31, 24, "unsigned");
-				decoded_data['metadata_error']['loramac_minor_version_error'] = decode_field(arg, 7, 23, 16, "unsigned");
-				decoded_data['metadata_error']['loramac_revision_error'] = decode_field(arg, 7, 15, 8, "unsigned");
-				var val = decode_field(arg, 7, 7, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['metadata_error']['region_error'] = "EU868";
-						break;
-					case 1:
-						decoded_data['metadata_error']['region_error'] = "US916";
-						break;
-					case 2:
-						decoded_data['metadata_error']['region_error'] = "AS923";
-						break;
-					case 3:
-						decoded_data['metadata_error']['region_error'] = "AU915";
-						break;
-					case 4:
-						decoded_data['metadata_error']['region_error'] = "IN865";
-						break;
-					case 5:
-						decoded_data['metadata_error']['region_error'] = "CN470";
-						break;
-					case 6:
-						decoded_data['metadata_error']['region_error'] = "KR920";
-						break;
-					case 7:
-						decoded_data['metadata_error']['region_error'] = "RU864";
-						break;
-					case 8:
-						decoded_data['metadata_error']['region_error'] = "DN915";
-						break;
-					default:
-						decoded_data['metadata_error']['region_error'] = "Invalid";
-				}}
-				return 7;
-			}
-		},
-		{
-			key: [0x72],
-			fn: function(arg) { 
-				var val = decode_field(arg, 1, 7, 0, "unsigned");
-				{switch (val){
-					case 10:
-						decoded_data['configuration_factory_reset_error'] = "App Config";
-						break;
-					case 176:
-						decoded_data['configuration_factory_reset_error'] = "LoRa Config";
-						break;
-					case 186:
-						decoded_data['configuration_factory_reset_error'] = "App & LoRa Config";
-						break;
-					default:
-						decoded_data['configuration_factory_reset_error'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-	];
-}
+		];
+	}
+
 if (port === 100) {
 	decoder = [
 		{
@@ -1523,8 +935,8 @@ if (port === 20) {
 				}
 			}
 			if (!found) {
-				decoded_data['error'] = "Unable to decode header " + toHexString(item.key).toUpperCase();
-				return decoded_data;
+				decoded_data['error'] = "Unable to decode header " + toHexString(header).toUpperCase();
+				break;
 			}
 		}
 	} catch (error) {
@@ -1539,34 +951,51 @@ if (port === 20) {
 		return res;
 	}
 
-	function trunc(v){
-		v = +v;
-		if (!isFinite(v)) return v;
-		return (v - v % 1)   ||   (v < 0 ? -0 : v === 0 ? v : 0);
-	}
-
 	// Extracts bits from a byte array
 	function extract_bytes(chunk, startBit, endBit) {
+		var array = new Array(0);
 		var totalBits = startBit - endBit + 1;
-		var totalBytes = totalBits % 8 === 0 ? to_uint(totalBits / 8) : to_uint(totalBits / 8) + 1;
-		var bitOffset = endBit % 8;
-		var arr = new Array(totalBytes);
-		for (var byte = totalBytes-1; byte >= 0; byte--) {
-			var chunkIndex = byte + (chunk.length - 1 - trunc(startBit / 8));
-			var lo = chunk[chunkIndex] >> bitOffset;
-			var hi = 0;
-			if (byte !== 0) {
-				var hi_bitmask = (1 << bitOffset) - 1
-				var bits_to_take_from_hi = 8 - bitOffset
-				hi = (chunk[chunkIndex - 1] & (hi_bitmask << bits_to_take_from_hi));
+		var totalBytes = Math.ceil(totalBits / 8);
+		var endBits = 0;
+		var startBits = 0;
+		for (var i = 0; i < totalBytes; i++) {
+			if(totalBits > 8) {
+				endBits = endBit;
+				startBits = endBits + 7;
+				endBit = endBit + 8;
+				totalBits -= 8;
 			} else {
-				lo = lo & ((1 << (totalBits % 8 ? totalBits % 8 : 8)) - 1);
+				endBits = endBit;
+				startBits = endBits + totalBits - 1;
+				totalBits = 0;
 			}
-			arr[byte] = hi | lo;
+			var endChunk = chunk.length - Math.ceil((endBits + 1) / 8);
+			var startChunk = chunk.length - Math.ceil((startBits + 1) / 8);
+			var word = 0x0;
+			if (startChunk == endChunk){
+				var endOffset = endBits % 8;
+				var startOffset = startBits % 8;
+				var mask = 0xFF >> (8 - (startOffset - endOffset + 1));
+				word = (chunk[startChunk] >> endOffset) & mask;
+				array.unshift(word);
+			} else {
+				var endChunkEndOffset = endBits % 8;
+				var endChunkStartOffset = 7;
+				var endChunkMask = 0xFF >> (8 - (endChunkStartOffset - endChunkEndOffset + 1));
+				var endChunkWord = (chunk[endChunk] >> endChunkEndOffset) & endChunkMask;
+				var startChunkEndOffset = 0;
+				var startChunkStartOffset = startBits % 8;
+				var startChunkMask = 0xFF >> (8 - (startChunkStartOffset - startChunkEndOffset + 1));
+				var startChunkWord = (chunk[startChunk] >> startChunkEndOffset) & startChunkMask;
+				var startChunkWordShifted = startChunkWord << (endChunkStartOffset - endChunkEndOffset + 1);
+				word = endChunkWord | startChunkWordShifted;
+				array.unshift(word);
+			}
 		}
-		return arr;
+		return array;
 	}
 
+	// Applies data type to a byte array
 	function apply_data_type(bytes, data_type) {
 		var output = 0;
 		if (data_type === "unsigned") {

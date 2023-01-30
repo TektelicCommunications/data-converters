@@ -1,5 +1,5 @@
 //DCG: v1.0.0
-
+function Decoder(bytes, port) {
 var decoded_data = {};
 var decoder = [];
 bytes = convertToUint8Array(bytes);
@@ -935,142 +935,160 @@ if (port === 10) {
 }
 
 
-	try {
-		for (var bytes_left = bytes.length; bytes_left > 0;) {
-			var found = false;
-			for (var i = 0; i < decoder.length; i++) {
-				var item = decoder[i];
-				var key = item.key;
-				var keylen = key.length;
-				var header = slice(bytes, 0, keylen);
-				if (is_equal(header, key)) { // Header in the data matches to what we expect
-					var f = item.fn;
-					var consumed = f(slice(bytes, keylen, bytes.length)) + keylen;
-					bytes_left -= consumed;
-					bytes = slice(bytes, consumed, bytes.length);
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				decoded_data['error'] = "Unable to decode header " + toHexString(item.key).toUpperCase();
-				return decoded_data;
+try {
+	for (var bytes_left = bytes.length; bytes_left > 0;) {
+		var found = false;
+		for (var i = 0; i < decoder.length; i++) {
+			var item = decoder[i];
+			var key = item.key;
+			var keylen = key.length;
+			var header = slice(bytes, 0, keylen);
+			if (is_equal(header, key)) { // Header in the data matches to what we expect
+				var f = item.fn;
+				var consumed = f(slice(bytes, keylen, bytes.length)) + keylen;
+				bytes_left -= consumed;
+				bytes = slice(bytes, consumed, bytes.length);
+				found = true;
+				break;
 			}
 		}
-	} catch (error) {
-		decoded_data['error'] = "Fatal decoder error";
+		if (!found) {
+			decoded_data['error'] = "Unable to decode header " + toHexString(header).toUpperCase();
+			break;
+		}
 	}
+} catch (error) {
+	decoded_data['error'] = "Fatal decoder error";
+}
 
-	function slice(a, f, t) {
-		var res = [];
-		for (var i = 0; i < t - f; i++) {
-			res[i] = a[f + i];
-		}
-		return res;
+function slice(a, f, t) {
+	var res = [];
+	for (var i = 0; i < t - f; i++) {
+		res[i] = a[f + i];
 	}
+	return res;
+}
 
-	function trunc(v){
-		v = +v;
-		if (!isFinite(v)) return v;
-		return (v - v % 1)   ||   (v < 0 ? -0 : v === 0 ? v : 0);
+// Extracts bits from a byte array
+function extract_bytes(chunk, startBit, endBit) {
+	var array = new Array(0);
+	var totalBits = startBit - endBit + 1;
+	var totalBytes = Math.ceil(totalBits / 8);
+	var endBits = 0;
+	var startBits = 0;
+	for (var i = 0; i < totalBytes; i++) {
+		if(totalBits > 8) {
+			endBits = endBit;
+			startBits = endBits + 7;
+			endBit = endBit + 8;
+			totalBits -= 8;
+		} else {
+			endBits = endBit;
+			startBits = endBits + totalBits - 1;
+			totalBits = 0;
+		}
+		var endChunk = chunk.length - Math.ceil((endBits + 1) / 8);
+		var startChunk = chunk.length - Math.ceil((startBits + 1) / 8);
+		var word = 0x0;
+		if (startChunk == endChunk){
+			var endOffset = endBits % 8;
+			var startOffset = startBits % 8;
+			var mask = 0xFF >> (8 - (startOffset - endOffset + 1));
+			word = (chunk[startChunk] >> endOffset) & mask;
+			array.unshift(word);
+		} else {
+			var endChunkEndOffset = endBits % 8;
+			var endChunkStartOffset = 7;
+			var endChunkMask = 0xFF >> (8 - (endChunkStartOffset - endChunkEndOffset + 1));
+			var endChunkWord = (chunk[endChunk] >> endChunkEndOffset) & endChunkMask;
+			var startChunkEndOffset = 0;
+			var startChunkStartOffset = startBits % 8;
+			var startChunkMask = 0xFF >> (8 - (startChunkStartOffset - startChunkEndOffset + 1));
+			var startChunkWord = (chunk[startChunk] >> startChunkEndOffset) & startChunkMask;
+			var startChunkWordShifted = startChunkWord << (endChunkStartOffset - endChunkEndOffset + 1);
+			word = endChunkWord | startChunkWordShifted;
+			array.unshift(word);
+		}
 	}
+	return array;
+}
 
-	// Extracts bits from a byte array
-	function extract_bytes(chunk, startBit, endBit) {
-		var totalBits = startBit - endBit + 1;
-		var totalBytes = totalBits % 8 === 0 ? to_uint(totalBits / 8) : to_uint(totalBits / 8) + 1;
-		var bitOffset = endBit % 8;
-		var arr = new Array(totalBytes);
-		for (var byte = totalBytes-1; byte >= 0; byte--) {
-			var chunkIndex = byte + (chunk.length - 1 - trunc(startBit / 8));
-			var lo = chunk[chunkIndex] >> bitOffset;
-			var hi = 0;
-			if (byte !== 0) {
-				var hi_bitmask = (1 << bitOffset) - 1
-				var bits_to_take_from_hi = 8 - bitOffset
-				hi = (chunk[chunkIndex - 1] & (hi_bitmask << bits_to_take_from_hi));
-			} else {
-				lo = lo & ((1 << (totalBits % 8 ? totalBits % 8 : 8)) - 1);
-			}
-			arr[byte] = hi | lo;
+// Applies data type to a byte array
+function apply_data_type(bytes, data_type) {
+	var output = 0;
+	if (data_type === "unsigned") {
+		for (var i = 0; i < bytes.length; ++i) {
+			output = (to_uint(output << 8)) | bytes[i];
 		}
-		return arr;
+		return output;
 	}
-
-	function apply_data_type(bytes, data_type) {
-		var output = 0;
-		if (data_type === "unsigned") {
-			for (var i = 0; i < bytes.length; ++i) {
-				output = (to_uint(output << 8)) | bytes[i];
-			}
-			return output;
+	if (data_type === "signed") {
+		for (var i = 0; i < bytes.length; ++i) {
+			output = (output << 8) | bytes[i];
 		}
-		if (data_type === "signed") {
-			for (var i = 0; i < bytes.length; ++i) {
-				output = (output << 8) | bytes[i];
-			}
-			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
-				output -= Math.pow(2, 8 * bytes.length);
-			}
-			return output;
+		// Convert to signed, based on value size
+		if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			output -= Math.pow(2, 8 * bytes.length);
 		}
-		if (data_type === "bool") {
-			return !(bytes[0] === 0);
-		}
-		if (data_type === "hexstring") {
-			return toHexString(bytes);
-		}
-		return null; // Incorrect data type
+		return output;
 	}
-
-	// Decodes bitfield from the given chunk of bytes
-	function decode_field(chunk, size, start_bit, end_bit, data_type) {
-		var new_chunk = chunk.slice(0, size);
-		var chunk_size = new_chunk.length;
-		if (start_bit >= chunk_size * 8) {
-			return null; // Error: exceeding boundaries of the chunk
-		}
-		if (start_bit < end_bit) {
-			return null; // Error: invalid input
-		}
-		var array = extract_bytes(new_chunk, start_bit, end_bit);
-		return apply_data_type(array, data_type);
+	if (data_type === "bool") {
+		return !(bytes[0] === 0);
 	}
-
-	// Converts value to unsigned
-	function to_uint(x) {
-		return x >>> 0;
+	if (data_type === "hexstring") {
+		return toHexString(bytes);
 	}
+	return null; // Incorrect data type
+}
 
-	// Checks if two arrays are equal
-	function is_equal(arr1, arr2) {
-		if (arr1.length != arr2.length) {
+// Decodes bitfield from the given chunk of bytes
+function decode_field(chunk, size, start_bit, end_bit, data_type) {
+	var new_chunk = chunk.slice(0, size);
+	var chunk_size = new_chunk.length;
+	if (start_bit >= chunk_size * 8) {
+		return null; // Error: exceeding boundaries of the chunk
+	}
+	if (start_bit < end_bit) {
+		return null; // Error: invalid input
+	}
+	var array = extract_bytes(new_chunk, start_bit, end_bit);
+	return apply_data_type(array, data_type);
+}
+
+// Converts value to unsigned
+function to_uint(x) {
+	return x >>> 0;
+}
+
+// Checks if two arrays are equal
+function is_equal(arr1, arr2) {
+	if (arr1.length != arr2.length) {
+		return false;
+	}
+	for (var i = 0; i != arr1.length; i++) {
+		if (arr1[i] != arr2[i]) {
 			return false;
 		}
-		for (var i = 0; i != arr1.length; i++) {
-			if (arr1[i] != arr2[i]) {
-				return false;
-			}
-		}
-		return true;
 	}
+	return true;
+}
 
-	// Converts array of bytes to hex string
-	function toHexString(byteArray) {
-		var arr = [];
-		for (var i = 0; i < byteArray.length; ++i) {
-			arr.push(('0' + (byteArray[i] & 0xFF).toString(16)).slice(-2));
-		}
-		return arr.join(' ');
+// Converts array of bytes to hex string
+function toHexString(byteArray) {
+	var arr = [];
+	for (var i = 0; i < byteArray.length; ++i) {
+		arr.push(('0' + (byteArray[i] & 0xFF).toString(16)).slice(-2));
 	}
+	return arr.join(' ');
+}
 
-    // Converts array of bytes to 8 bit array
-    function convertToUint8Array(byteArray) {
-		var arr = [];
-		for (var i = 0; i < byteArray.length; i++) {
-			arr.push(to_uint(byteArray[i]) & 0xff);
-		}
-		return arr;
+// Converts array of bytes to 8 bit array
+function convertToUint8Array(byteArray) {
+	var arr = [];
+	for (var i = 0; i < byteArray.length; i++) {
+		arr.push(to_uint(byteArray[i]) & 0xff);
 	}
-	return decoded_data;
+	return arr;
+}
+return decoded_data;
+}

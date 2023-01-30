@@ -6,37 +6,6 @@ bytes = convertToUint8Array(bytes);
 decoded_data['raw'] = toHexString(bytes).toUpperCase();
 decoded_data['port'] = port;
 
-if(port === 101){
-	decoder = [
-		{
-			key: [],
-			fn: function(arg) { 
-				var size = arg.length;
-				var invalid_registers = [];
-				var responses = [];
-				while(arg.length > 0){
-					const downlink_fcnt = arg[0];
-					const num_invalid_writes = arg[1];
-					arg = arg.slice(2);
-					if(num_invalid_writes > 0) {
-						for(var i = 0; i < num_invalid_writes; i++){
-							invalid_registers.push("0x" + arg[i].toString(16));
-						}
-						arg = arg.slice(num_invalid_writes);
-						responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
-					}
-					else {
-						responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
-					}
-					invalid_registers = [];
-				}
-				decoded_data["response"] = responses;
-				return size;
-			}
-		}
-	];
-}
-
 if (port === 100) {
 	decoder = [
 		{
@@ -787,49 +756,14 @@ if (port === 10) {
 		{
 			key: [0x01, 0x04],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				var output = 0;
-				if (val > 2781){
-					output = "Dry";
-				} else if (val > 2776 && val <= 2781){
-					output = 0.1;
-				} else if (val > 2771 && val <= 2776){
-					output = 0.2;
-				} else if (val > 2766 && val <= 2771){
-					output = 0.3;
-				} else if (val > 2761 && val <= 2766){
-					output = 0.4;
-				} else if (val > 2756 && val <= 2761){
-					output = 0.5;
-				} else if (val > 2751 && val <= 2756){
-					output = 0.6;
-				} else if (val > 2746 && val <= 2751){
-					output = 0.7;
-				} else if (val > 2741 && val <= 2746){
-					output = 0.8;
-				} else if (val > 2736 && val <= 2741){
-					output = 0.9;
-				} else if (val > 2731 && val <= 2736){
-					output = 1.0;
-				} else if (val > 2726 && val <= 2731){
-					output = 1.1;
-				} else if (val > 2721 && val <= 2726){
-					output = 1.2;
-				} else {
-					output = "Wet";
-				}
-				decoded_data['soil_moisture'] = output;
-				decoded_data['soil_moisture_raw'] = val;
+				decoded_data['input1_frequency'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x02, 0x02],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				var output = 2.39e-5 * Math.pow(val, 2) - 0.1011 * val + 77.34;
-				decoded_data['soil_temperature'] = output;
-				decoded_data['soil_temperature_raw'] = val;
+				decoded_data['input2_voltage'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
 				return 2;
 			}
 		},
@@ -838,8 +772,7 @@ if (port === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				decoded_data['Input3_voltage'] = val;
-				decoded_data['Input3_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input3_voltage_temp'] = (-31.96 * Math.log(val)) + 213.25;
 				return 2;
 			}
 		},
@@ -855,8 +788,7 @@ if (port === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				decoded_data['Input4_voltage'] = val;
-				decoded_data['Input4_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input4_voltage_temp'] = (-31.96 * Math.log(val)) + 213.25;
 				return 2;
 			}
 		},
@@ -870,15 +802,79 @@ if (port === 10) {
 		{
 			key: [0x05, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark1_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				{switch (val){
+					case (val > 6430):
+						output = 0;
+						break;
+					case (val >= 4330 && val <= 6430):
+						output = 9.000 - (val - 4330.000) * 0.004286;
+						break;
+					case (val >= 2820 && val < 4330):
+						output = 15.000 - (val - 2820.000) * 0.003974;
+						break;
+					case (val >= 1110 && val < 2820):
+						output = 35.000 - (val - 1110.000) * 0.01170;
+						break;
+					case (val >= 770 && val < 1110):
+						output = 55.000 - (val - 770.000) * 0.05884;
+						break;
+					case (val >= 600 && val < 770):
+						output = 75.000 - (val - 600.000) * 0.1176;
+						break;
+					case (val >= 485 && val < 600):
+						output = 100.000 - (val - 485.000) * 0.2174;
+						break;
+					case (val >= 293 && val < 485):
+						output = 200.000 - (val - 293.000) * 0.5208;
+						break;
+					default:
+						output = 200;
+					
+					decoded_data['watermark2_tension'] = output;
+					return 2;
+					}
+				}
 			}
 		},
 		{
 			key: [0x06, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark2_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				{switch (val){
+					case (val > 6430):
+						output = 0;
+						break;
+					case (val >= 4330 && val <= 6430):
+						output = 9.000 - (val - 4330.000) * 0.004286;
+						break;
+					case (val >= 2820 && val < 4330):
+						output = 15.000 - (val - 2820.000) * 0.003974;
+						break;
+					case (val >= 1110 && val < 2820):
+						output = 35.000 - (val - 1110.000) * 0.01170;
+						break;
+					case (val >= 770 && val < 1110):
+						output = 55.000 - (val - 770.000) * 0.05884;
+						break;
+					case (val >= 600 && val < 770):
+						output = 75.000 - (val - 600.000) * 0.1176;
+						break;
+					case (val >= 485 && val < 600):
+						output = 100.000 - (val - 485.000) * 0.2174;
+						break;
+					case (val >= 293 && val < 485):
+						output = 200.000 - (val - 293.000) * 0.5208;
+						break;
+					default:
+						output = 200;
+		
+					decoded_data['watermark2_tension'] = output;
+					return 2;
+					}
+				}
 			}
 		},
 		{
@@ -966,160 +962,161 @@ if (port === 10) {
 }
 
 
-	try {
-		for (var bytes_left = bytes.length; bytes_left > 0;) {
-			var found = false;
-			for (var i = 0; i < decoder.length; i++) {
-				var item = decoder[i];
-				var key = item.key;
-				var keylen = key.length;
-				var header = slice(bytes, 0, keylen);
-				if (is_equal(header, key)) { // Header in the data matches to what we expect
-					var f = item.fn;
-					var consumed = f(slice(bytes, keylen, bytes.length)) + keylen;
-					bytes_left -= consumed;
-					bytes = slice(bytes, consumed, bytes.length);
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				decoded_data['error'] = "Unable to decode header " + toHexString(header).toUpperCase();
+try {
+	for (var bytes_left = bytes.length; bytes_left > 0;) {
+		var found = false;
+		for (var i = 0; i < decoder.length; i++) {
+			var item = decoder[i];
+			var key = item.key;
+			var keylen = key.length;
+			var header = slice(bytes, 0, keylen);
+			if (is_equal(header, key)) { // Header in the data matches to what we expect
+				var f = item.fn;
+				var consumed = f(slice(bytes, keylen, bytes.length)) + keylen;
+				bytes_left -= consumed;
+				bytes = slice(bytes, consumed, bytes.length);
+				found = true;
 				break;
 			}
 		}
-	} catch (error) {
-		decoded_data['error'] = "Fatal decoder error";
+		if (!found) {
+			decoded_data['error'] = "Unable to decode header " + toHexString(header).toUpperCase();
+			break;
+		}
 	}
+} catch (error) {
+	decoded_data['error'] = "Fatal decoder error";
+}
 
-	function slice(a, f, t) {
-		var res = [];
-		for (var i = 0; i < t - f; i++) {
-			res[i] = a[f + i];
-		}
-		return res;
+function slice(a, f, t) {
+	var res = [];
+	for (var i = 0; i < t - f; i++) {
+		res[i] = a[f + i];
 	}
+	return res;
+}
 
-	// Extracts bits from a byte array
-	function extract_bytes(chunk, startBit, endBit) {
-		var array = new Array(0);
-		var totalBits = startBit - endBit + 1;
-		var totalBytes = Math.ceil(totalBits / 8);
-		var endBits = 0;
-		var startBits = 0;
-		for (var i = 0; i < totalBytes; i++) {
-			if(totalBits > 8) {
-				endBits = endBit;
-				startBits = endBits + 7;
-				endBit = endBit + 8;
-				totalBits -= 8;
-			} else {
-				endBits = endBit;
-				startBits = endBits + totalBits - 1;
-				totalBits = 0;
-			}
-			var endChunk = chunk.length - Math.ceil((endBits + 1) / 8);
-			var startChunk = chunk.length - Math.ceil((startBits + 1) / 8);
-			var word = 0x0;
-			if (startChunk == endChunk){
-				var endOffset = endBits % 8;
-				var startOffset = startBits % 8;
-				var mask = 0xFF >> (8 - (startOffset - endOffset + 1));
-				word = (chunk[startChunk] >> endOffset) & mask;
-				array.unshift(word);
-			} else {
-				var endChunkEndOffset = endBits % 8;
-				var endChunkStartOffset = 7;
-				var endChunkMask = 0xFF >> (8 - (endChunkStartOffset - endChunkEndOffset + 1));
-				var endChunkWord = (chunk[endChunk] >> endChunkEndOffset) & endChunkMask;
-				var startChunkEndOffset = 0;
-				var startChunkStartOffset = startBits % 8;
-				var startChunkMask = 0xFF >> (8 - (startChunkStartOffset - startChunkEndOffset + 1));
-				var startChunkWord = (chunk[startChunk] >> startChunkEndOffset) & startChunkMask;
-				var startChunkWordShifted = startChunkWord << (endChunkStartOffset - endChunkEndOffset + 1);
-				word = endChunkWord | startChunkWordShifted;
-				array.unshift(word);
-			}
+// Extracts bits from a byte array
+function extract_bytes(chunk, startBit, endBit) {
+	var array = new Array(0);
+	var totalBits = startBit - endBit + 1;
+	var totalBytes = Math.ceil(totalBits / 8);
+	var endBits = 0;
+	var startBits = 0;
+	for (var i = 0; i < totalBytes; i++) {
+		if(totalBits > 8) {
+			endBits = endBit;
+			startBits = endBits + 7;
+			endBit = endBit + 8;
+			totalBits -= 8;
+		} else {
+			endBits = endBit;
+			startBits = endBits + totalBits - 1;
+			totalBits = 0;
 		}
-		return array;
+		var endChunk = chunk.length - Math.ceil((endBits + 1) / 8);
+		var startChunk = chunk.length - Math.ceil((startBits + 1) / 8);
+		var word = 0x0;
+		if (startChunk == endChunk){
+			var endOffset = endBits % 8;
+			var startOffset = startBits % 8;
+			var mask = 0xFF >> (8 - (startOffset - endOffset + 1));
+			word = (chunk[startChunk] >> endOffset) & mask;
+			array.unshift(word);
+		} else {
+			var endChunkEndOffset = endBits % 8;
+			var endChunkStartOffset = 7;
+			var endChunkMask = 0xFF >> (8 - (endChunkStartOffset - endChunkEndOffset + 1));
+			var endChunkWord = (chunk[endChunk] >> endChunkEndOffset) & endChunkMask;
+			var startChunkEndOffset = 0;
+			var startChunkStartOffset = startBits % 8;
+			var startChunkMask = 0xFF >> (8 - (startChunkStartOffset - startChunkEndOffset + 1));
+			var startChunkWord = (chunk[startChunk] >> startChunkEndOffset) & startChunkMask;
+			var startChunkWordShifted = startChunkWord << (endChunkStartOffset - endChunkEndOffset + 1);
+			word = endChunkWord | startChunkWordShifted;
+			array.unshift(word);
+		}
 	}
+	return array;
+}
 
-	// Applies data type to a byte array
-	function apply_data_type(bytes, data_type) {
-		var output = 0;
-		if (data_type === "unsigned") {
-			for (var i = 0; i < bytes.length; ++i) {
-				output = (to_uint(output << 8)) | bytes[i];
-			}
-			return output;
+// Applies data type to a byte array
+function apply_data_type(bytes, data_type) {
+	var output = 0;
+	if (data_type === "unsigned") {
+		for (var i = 0; i < bytes.length; ++i) {
+			output = (to_uint(output << 8)) | bytes[i];
 		}
-		if (data_type === "signed") {
-			for (var i = 0; i < bytes.length; ++i) {
-				output = (output << 8) | bytes[i];
-			}
-			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
-				output -= Math.pow(2, 8 * bytes.length);
-			}
-			return output;
-		}
-		if (data_type === "bool") {
-			return !(bytes[0] === 0);
-		}
-		if (data_type === "hexstring") {
-			return toHexString(bytes);
-		}
-		return null; // Incorrect data type
+		return output;
 	}
-
-	// Decodes bitfield from the given chunk of bytes
-	function decode_field(chunk, size, start_bit, end_bit, data_type) {
-		var new_chunk = chunk.slice(0, size);
-		var chunk_size = new_chunk.length;
-		if (start_bit >= chunk_size * 8) {
-			return null; // Error: exceeding boundaries of the chunk
+	if (data_type === "signed") {
+		for (var i = 0; i < bytes.length; ++i) {
+			output = (output << 8) | bytes[i];
 		}
-		if (start_bit < end_bit) {
-			return null; // Error: invalid input
+		// Convert to signed, based on value size
+		if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			output -= Math.pow(2, 8 * bytes.length);
 		}
-		var array = extract_bytes(new_chunk, start_bit, end_bit);
-		return apply_data_type(array, data_type);
+		return output;
 	}
-
-	// Converts value to unsigned
-	function to_uint(x) {
-		return x >>> 0;
+	if (data_type === "bool") {
+		return !(bytes[0] === 0);
 	}
+	if (data_type === "hexstring") {
+		return toHexString(bytes);
+	}
+	return null; // Incorrect data type
+}
 
-	// Checks if two arrays are equal
-	function is_equal(arr1, arr2) {
-		if (arr1.length != arr2.length) {
+// Decodes bitfield from the given chunk of bytes
+function decode_field(chunk, size, start_bit, end_bit, data_type) {
+	var new_chunk = chunk.slice(0, size);
+	var chunk_size = new_chunk.length;
+	if (start_bit >= chunk_size * 8) {
+		return null; // Error: exceeding boundaries of the chunk
+	}
+	if (start_bit < end_bit) {
+		return null; // Error: invalid input
+	}
+	var array = extract_bytes(new_chunk, start_bit, end_bit);
+	return apply_data_type(array, data_type);
+}
+
+// Converts value to unsigned
+function to_uint(x) {
+	return x >>> 0;
+}
+
+// Checks if two arrays are equal
+function is_equal(arr1, arr2) {
+	if (arr1.length != arr2.length) {
+		return false;
+	}
+	for (var i = 0; i != arr1.length; i++) {
+		if (arr1[i] != arr2[i]) {
 			return false;
 		}
-		for (var i = 0; i != arr1.length; i++) {
-			if (arr1[i] != arr2[i]) {
-				return false;
-			}
-		}
-		return true;
 	}
+	return true;
+}
 
-	// Converts array of bytes to hex string
-	function toHexString(byteArray) {
-		var arr = [];
-		for (var i = 0; i < byteArray.length; ++i) {
-			arr.push(('0' + (byteArray[i] & 0xFF).toString(16)).slice(-2));
-		}
-		return arr.join(' ');
+// Converts array of bytes to hex string
+function toHexString(byteArray) {
+	var arr = [];
+	for (var i = 0; i < byteArray.length; ++i) {
+		arr.push(('0' + (byteArray[i] & 0xFF).toString(16)).slice(-2));
 	}
+	return arr.join(' ');
+}
 
-    // Converts array of bytes to 8 bit array
-    function convertToUint8Array(byteArray) {
-		var arr = [];
-		for (var i = 0; i < byteArray.length; i++) {
-			arr.push(to_uint(byteArray[i]) & 0xff);
-		}
-		return arr;
+// Converts array of bytes to 8 bit array
+function convertToUint8Array(byteArray) {
+	var arr = [];
+	for (var i = 0; i < byteArray.length; i++) {
+		arr.push(to_uint(byteArray[i]) & 0xff);
 	}
-	return decoded_data;
+	return arr;
+}
+
+return decoded_data;
 }
