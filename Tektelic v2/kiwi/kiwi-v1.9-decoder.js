@@ -966,34 +966,51 @@ if (input.fPort === 10) {
 		return res;
 	}
 
-	function trunc(v){
-		v = +v;
-		if (!isFinite(v)) return v;
-		return (v - v % 1)   ||   (v < 0 ? -0 : v === 0 ? v : 0);
-	}
-
 	// Extracts bits from a byte array
 	function extract_bytes(chunk, startBit, endBit) {
+		var array = new Array(0);
 		var totalBits = startBit - endBit + 1;
-		var totalBytes = totalBits % 8 === 0 ? to_uint(totalBits / 8) : to_uint(totalBits / 8) + 1;
-		var bitOffset = endBit % 8;
-		var arr = new Array(totalBytes);
-		for (var byte = totalBytes-1; byte >= 0; byte--) {
-			var chunkIndex = byte + (chunk.length - 1 - trunc(startBit / 8));
-			var lo = chunk[chunkIndex] >> bitOffset;
-			var hi = 0;
-			if (byte !== 0) {
-				var hi_bitmask = (1 << bitOffset) - 1
-				var bits_to_take_from_hi = 8 - bitOffset
-				hi = (chunk[chunkIndex - 1] & (hi_bitmask << bits_to_take_from_hi));
+		var totalBytes = Math.ceil(totalBits / 8);
+		var endBits = 0;
+		var startBits = 0;
+		for (var i = 0; i < totalBytes; i++) {
+			if(totalBits > 8) {
+				endBits = endBit;
+				startBits = endBits + 7;
+				endBit = endBit + 8;
+				totalBits -= 8;
 			} else {
-				lo = lo & ((1 << (totalBits % 8 ? totalBits % 8 : 8)) - 1);
+				endBits = endBit;
+				startBits = endBits + totalBits - 1;
+				totalBits = 0;
 			}
-			arr[byte] = hi | lo;
+			var endChunk = chunk.length - Math.ceil((endBits + 1) / 8);
+			var startChunk = chunk.length - Math.ceil((startBits + 1) / 8);
+			var word = 0x0;
+			if (startChunk == endChunk){
+				var endOffset = endBits % 8;
+				var startOffset = startBits % 8;
+				var mask = 0xFF >> (8 - (startOffset - endOffset + 1));
+				word = (chunk[startChunk] >> endOffset) & mask;
+				array.unshift(word);
+			} else {
+				var endChunkEndOffset = endBits % 8;
+				var endChunkStartOffset = 7;
+				var endChunkMask = 0xFF >> (8 - (endChunkStartOffset - endChunkEndOffset + 1));
+				var endChunkWord = (chunk[endChunk] >> endChunkEndOffset) & endChunkMask;
+				var startChunkEndOffset = 0;
+				var startChunkStartOffset = startBits % 8;
+				var startChunkMask = 0xFF >> (8 - (startChunkStartOffset - startChunkEndOffset + 1));
+				var startChunkWord = (chunk[startChunk] >> startChunkEndOffset) & startChunkMask;
+				var startChunkWordShifted = startChunkWord << (endChunkStartOffset - endChunkEndOffset + 1);
+				word = endChunkWord | startChunkWordShifted;
+				array.unshift(word);
+			}
 		}
-		return arr;
+		return array;
 	}
 
+	// Applies data type to a byte array
 	function apply_data_type(bytes, data_type) {
 		var output = 0;
 		if (data_type === "unsigned") {
@@ -1072,12 +1089,11 @@ if (input.fPort === 10) {
 	}
 
     var output = {
-        "data": decoded_data
+        "data": decoded_data,
+		"errors": errors,
+		"warnings": [],
+		"tektelicMetadata": input.tektelicMetadata
     };
-
-    if (errors.length > 0) {
-        output.errors = errors;
-    }
 
     return output;
 //}
