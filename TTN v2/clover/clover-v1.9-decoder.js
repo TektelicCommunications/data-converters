@@ -15,8 +15,8 @@ if(port === 101){
 				var invalid_registers = [];
 				var responses = [];
 				while(arg.length > 0){
-					const downlink_fcnt = arg[0];
-					const num_invalid_writes = arg[1];
+					var downlink_fcnt = arg[0];
+					var num_invalid_writes = arg[1];
 					arg = arg.slice(2);
 					if(num_invalid_writes > 0) {
 						for(var i = 0; i < num_invalid_writes; i++){
