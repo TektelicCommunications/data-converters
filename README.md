@@ -21,9 +21,9 @@ This repository contains the data converters that are to be used on TEKTELIC & o
 ### Available Versions
 There are four versions of each data converters available.
 - Tektelic v1
-- Tektelic v2 (LoRa Alliance® LoRaWAN® Payload Codec API 1.0.0 compliant)
+- Tektelic v2
+- LoRa Alliance® LoRaWAN® Payload Codec API 1.0.0
 - TTN v2
-- TTN v3
 
 ### How to add Data Converter to TEKTELIC Network Server
 1. Log into TEKTELIC Network Server ([NA](https://lorawan-ns-na.tektelic.com) or [EU](https://lorawan-ns-eu.tektelic.com))
@@ -32,6 +32,10 @@ There are four versions of each data converters available.
 4. Enter a Name for the Data Converter and Select `Custom` if using `Tektelic v1` data converters or `Custom v2` if using `Tektelic v2` data converters
 5. Copy the code in the data converter file that you wish to use and paste it in the available sections
 6. Click `Add`
+
+### Data Converters for TTN
+- For TTNv2 use the data converters available in `TTNv2` folder
+- For TTNv3 use the data converters available in `LoRa Alliance Payload Codec 1.0.0` folder. 
 
 ### Notes
 - The files are named [sensor name]-[TRM version]-[data converter type].js

@@ -1,3 +1,5 @@
+//function decodeDownlink(input) {
+
 var sensor = 
 {
     "loramac_config": {
@@ -2188,4 +2190,9 @@ function encode(commands, sensor) {
     return encoded_data;
 }
 
-return encode(input.data, sensor)
+return {
+    data: encode(input.data, sensor),
+    warnings: [],
+    errors: []
+  }
+//}

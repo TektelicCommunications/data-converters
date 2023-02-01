@@ -1,3 +1,4 @@
+//function decodeUplink(input) {
     var bytes = input.bytes;
     var port = input.fPort;
 
@@ -359,4 +360,9 @@
         return arr.join('');
     }
 
-    return decoded_data;
+  return {
+    data: decoded_data,
+    warnings: [],
+    errors: []
+  };
+//}
