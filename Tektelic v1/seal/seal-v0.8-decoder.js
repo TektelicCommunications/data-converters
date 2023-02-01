@@ -83,7 +83,7 @@ if (port === 10) {
 				}
 				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.0000107).toFixed(7);
 				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.0000215).toFixed(7);
-				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.145 + 500).toFixed(3);
+				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.145 - 500).toFixed(3);
 				return 8;
 			}
 		},
