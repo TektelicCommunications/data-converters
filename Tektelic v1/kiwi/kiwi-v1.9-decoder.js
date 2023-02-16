@@ -835,15 +835,81 @@ if (port === 10) {
 		{
 			key: [0x05, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark1_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				{switch (val){
+					case (val > 6430):
+						output = 0;
+						break;
+					case (val >= 4330 && val <= 6430):
+						output = 9.000 - (val - 4330.000) * 0.004286;
+						break;
+					case (val >= 2820 && val < 4330):
+						output = 15.000 - (val - 2820.000) * 0.003974;
+						break;
+					case (val >= 1110 && val < 2820):
+						output = 35.000 - (val - 1110.000) * 0.01170;
+						break;
+					case (val >= 770 && val < 1110):
+						output = 55.000 - (val - 770.000) * 0.05884;
+						break;
+					case (val >= 600 && val < 770):
+						output = 75.000 - (val - 600.000) * 0.1176;
+						break;
+					case (val >= 485 && val < 600):
+						output = 100.000 - (val - 485.000) * 0.2174;
+						break;
+					case (val >= 293 && val < 485):
+						output = 200.000 - (val - 293.000) * 0.5208;
+						break;
+					default:
+						output = 200;
+					
+					decoded_data['watermark1_tension'] = output;
+					decoded_data['watermark1_tension_raw'] = val;
+					return 2;
+					}
+				}
 			}
 		},
 		{
 			key: [0x06, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark2_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				{switch (val){
+					case (val > 6430):
+						output = 0;
+						break;
+					case (val >= 4330 && val <= 6430):
+						output = 9.000 - (val - 4330.000) * 0.004286;
+						break;
+					case (val >= 2820 && val < 4330):
+						output = 15.000 - (val - 2820.000) * 0.003974;
+						break;
+					case (val >= 1110 && val < 2820):
+						output = 35.000 - (val - 1110.000) * 0.01170;
+						break;
+					case (val >= 770 && val < 1110):
+						output = 55.000 - (val - 770.000) * 0.05884;
+						break;
+					case (val >= 600 && val < 770):
+						output = 75.000 - (val - 600.000) * 0.1176;
+						break;
+					case (val >= 485 && val < 600):
+						output = 100.000 - (val - 485.000) * 0.2174;
+						break;
+					case (val >= 293 && val < 485):
+						output = 200.000 - (val - 293.000) * 0.5208;
+						break;
+					default:
+						output = 200;
+		
+					decoded_data['watermark2_tension'] = output;
+					decoded_data['watermark2_tension_raw'] = val;
+					return 2;
+					}
+				}
 			}
 		},
 		{
