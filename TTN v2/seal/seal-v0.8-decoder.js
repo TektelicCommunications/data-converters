@@ -5,8 +5,10 @@ function Decoder(bytes, port) {
 	var bytes = convertToUint8Array(bytes);
 	decoded_data['raw'] = toHexString(bytes).toUpperCase();
 	decoded_data['port'] = port;
-
-	if(port === 101){
+	var input = {
+		"fPort": port,
+	}
+	if(input.fPort === 101){
 		decoder = [
 			{
 				key: [],
@@ -37,7 +39,7 @@ function Decoder(bytes, port) {
 		];
 	}
 	
-if (port === 10) {
+if (input.fPort === 10) {
 	decoder = [
 		{
 			key: [0x00, 0xD3],
@@ -83,7 +85,7 @@ if (port === 10) {
 				}
 				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.0000107).toFixed(7);
 				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.0000215).toFixed(7);
-				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.145 - 500).toFixed(3);
+				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.145 + -500).toFixed(3);
 				return 8;
 			}
 		},
@@ -294,7 +296,7 @@ if (port === 10) {
 		},
 	];
 }
-if (port === 25) {
+if (input.fPort === 25) {
 	decoder = [
 		{
 			key: [0xFF],
@@ -317,7 +319,7 @@ if (port === 25) {
 		},
 	];
 }
-if (port === 100) {
+if (input.fPort === 100) {
 	decoder = [
 		{
 			key: [0x10],
@@ -1134,7 +1136,7 @@ if (port === 100) {
 		},
 	];
 }
-if (port === 15) {
+if (input.fPort === 15) {
 	decoder = [
 		{
 			key: [0x01],

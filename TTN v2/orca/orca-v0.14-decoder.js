@@ -1248,26 +1248,28 @@ if (input.fPort === 15) {
 				if(!decoded_data.hasOwnProperty('log_all')) {
 					decoded_data['log_all'] = {};
 				}
-				decoded_data['log_all']['fragment_number_3'] = decode_field(arg, 17, 135, 128, "unsigned");
+				var fragment_number_3 = {}
+				fragment_number_3['fragment_number_3'] = decode_field(arg, 17, 135, 128, "unsigned");
+				arg = arg.slice(1);
 					var data = [];
+					data.push(fragment_number_3);
 					var loop = arg.length / 16;
 					for (var i = 0; i < loop; i++) {
 						var group = {};
-						group['fragment_number_3'] = decode_field(arg, 16, 135, 128, "unsigned");
 						group['year_3'] = decode_field(arg, 16, 127, 112, "unsigned");
 						group['month_3'] = decode_field(arg, 16, 111, 104, "unsigned");
 						group['day_3'] = decode_field(arg, 16, 103, 96, "unsigned");
 						group['hour_3'] = decode_field(arg, 16, 95, 88, "unsigned");
 						group['minute_3'] = decode_field(arg, 16, 87, 80, "unsigned");
 						group['second_3'] = decode_field(arg, 16, 79, 72, "unsigned");
-						group['lattitude_3'] = decode_field(arg, 16, 71, 48, "signed");
-						group['longitude_3'] = decode_field(arg, 16, 47, 16, "signed");
-						group['altitude_3'] = decode_field(arg, 16, 15, 0, "signed");
+						group['lattitude_3'] = (decode_field(arg, 16, 71, 48, "signed") * 0.0000125).toFixed(7);;
+						group['longitude_3'] = (decode_field(arg, 16, 47, 16, "signed") * 0.0000001).toFixed(7);
+						group['altitude_3'] = (decode_field(arg, 16, 15, 0, "signed") * 0.5).toFixed(1);
 						data.push(group);
 						arg = arg.slice(16);
 					}
 					decoded_data['log_all'] = data;
-					return loop*16;
+					return loop*16 + 1;
 			}
 		},
 	];

@@ -5,8 +5,10 @@ function Decoder(bytes, port) {
 	var bytes = convertToUint8Array(bytes);
 	decoded_data['raw'] = toHexString(bytes).toUpperCase();
 	decoded_data['port'] = port;
-
-	if(port === 101){
+	var input = {
+		"fPort": port,
+	}
+	if(input.fPort === 101){
 		decoder = [
 			{
 				key: [],
@@ -37,7 +39,7 @@ function Decoder(bytes, port) {
 		];
 	}
 	
-if (port === 100) {
+if (input.fPort === 100) {
 	decoder = [
 		{
 			key: [0x00],
@@ -798,7 +800,7 @@ if (port === 100) {
 		},
 	];
 }
-if (port === 10) {
+if (input.fPort === 10) {
 	decoder = [
 		{
 			key: [0x00, 0xBA],
@@ -882,7 +884,7 @@ if (port === 10) {
 		},
 	];
 }
-if (port === 20) {
+if (input.fPort === 20) {
 	decoder = [
 		{
 			key: [0xD7, 0x00],

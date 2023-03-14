@@ -1079,9 +1079,9 @@ function encodeDownlink(input) {
     },
     "deep_sleep": {
         "deep_sleep": {
-            "header": "none",
-            "data_size": 1,
-            "bit_start": 7,
+            "header": "0x00",
+            "data_size": 0,
+            "bit_start": 0,
             "bit_end": 0,
             "type": "unsigned",
             "round": "",
@@ -1089,7 +1089,7 @@ function encodeDownlink(input) {
             "access": "W",
             "multiple": 0,
             "port": 99,
-            "or_80_to_write": 1
+            "or_80_to_write": 0
         }
     }
 }

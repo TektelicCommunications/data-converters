@@ -4,8 +4,10 @@
 	var bytes = convertToUint8Array(bytes);
 	decoded_data['raw'] = toHexString(bytes).toUpperCase();
 	decoded_data['port'] = port;
-
-	if(port === 101){
+	var input = {
+		"fPort": port,
+	}
+	if(input.fPort === 101){
 		decoder = [
 			{
 				key: [],
@@ -36,7 +38,7 @@
 		];
 	}
 	
-if (port === 100) {
+if (input.fPort === 100) {
 	decoder = [
 		{
 			key: [0x10],
@@ -761,7 +763,7 @@ if (port === 100) {
 		},
 	];
 }
-if (port === 10) {
+if (input.fPort === 10) {
 	decoder = [
 		{
 			key: [0x00, 0xBA],
@@ -812,7 +814,7 @@ if (port === 10) {
 		{
 			key: [0x03, 0x02],
 			fn: function(arg) { 
-				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001);
+				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001).toFixed(3);
 				decoded_data['Input3_voltage'] = val;
 				decoded_data['Input3_voltage_to_temp'] = ((-33.01 * Math.pow(val, 5)) + (217.4 * Math.pow(val, 4)) + (-538.6 * Math.pow(val, 3)) + (628.1 * Math.pow(val, 2)) + (-378.9 * val) + 102.9).toFixed(1);
 				return 2;
@@ -828,7 +830,7 @@ if (port === 10) {
 		{
 			key: [0x04, 0x02],
 			fn: function(arg) { 
-				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001);
+				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001).toFixed(3);
 				decoded_data['Input4_voltage'] = val;
 				decoded_data['Input4_voltage_to_temp'] = ((-33.01 * Math.pow(val, 5)) + (217.4 * Math.pow(val, 4)) + (-538.6 * Math.pow(val, 3)) + (628.1 * Math.pow(val, 2)) + (-378.9 * val) + 102.9).toFixed(1);
 				return 2;

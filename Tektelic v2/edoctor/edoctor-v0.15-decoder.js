@@ -36,7 +36,7 @@
 		];
 	}
 
-if (port === 100) {
+if (input.fPort === 100) {
 	decoder = [
 		{
 			key: [0x00],
@@ -500,7 +500,7 @@ if (port === 100) {
 		},
 	];
 }
-if (port === 10) {
+if (input.fPort === 10) {
 	decoder = [
 		{
 			key: [],
