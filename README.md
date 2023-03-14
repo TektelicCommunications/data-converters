@@ -39,3 +39,4 @@ There are four versions of each data converters available.
 
 ### Notes
 - The files are named [sensor name]-[TRM version]-[data converter type].js
+- Encoder can be found in the `Encoders` folder for each sensors

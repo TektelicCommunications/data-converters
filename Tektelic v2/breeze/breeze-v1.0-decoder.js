@@ -1,5 +1,3 @@
-//function decodeUplink(input){
-
 	var decoded_data = {};
 	var decoder = [];
 	var errors = [];
@@ -38,7 +36,7 @@
 		];
 	}
 
-if (input.fPort === 100) {
+if (port === 100) {
 	decoder = [
 		{
 			key: [0x00],
@@ -799,7 +797,7 @@ if (input.fPort === 100) {
 		},
 	];
 }
-if (input.fPort === 10) {
+if (port === 10) {
 	decoder = [
 		{
 			key: [0x00, 0xBA],
@@ -883,7 +881,7 @@ if (input.fPort === 10) {
 		},
 	];
 }
-if (input.fPort === 20) {
+if (port === 20) {
 	decoder = [
 		{
 			key: [0xD7, 0x00],
@@ -916,7 +914,6 @@ if (input.fPort === 20) {
 		},
 	];
 }
-
 
 	try {
 		for (var bytes_left = bytes.length; bytes_left > 0;) {
@@ -1082,4 +1079,3 @@ if (input.fPort === 20) {
     };
 
     return output;
-//}

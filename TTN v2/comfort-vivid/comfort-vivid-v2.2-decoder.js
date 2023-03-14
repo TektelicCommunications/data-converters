@@ -1,10 +1,10 @@
-//DCG: v1.0.0
 function Decoder(bytes, port) {
-var decoded_data = {};
-var decoder = [];
-bytes = convertToUint8Array(bytes);
-decoded_data['raw'] = toHexString(bytes).toUpperCase();
-decoded_data['port'] = port;
+	var decoded_data = {};
+	var decoder = [];
+	var errors = [];
+	var bytes = convertToUint8Array(bytes);
+	decoded_data['raw'] = toHexString(bytes).toUpperCase();
+	decoded_data['port'] = port;
 
 	if(port === 101){
 		decoder = [
@@ -36,7 +36,7 @@ decoded_data['port'] = port;
 			}
 		];
 	}
-
+	
 if (port === 100) {
 	decoder = [
 		{
@@ -1540,7 +1540,6 @@ if (port === 10) {
 	];
 }
 
-
 	try {
 		for (var bytes_left = bytes.length; bytes_left > 0;) {
 			var found = false;
@@ -1559,12 +1558,12 @@ if (port === 10) {
 				}
 			}
 			if (!found) {
-				decoded_data['error'] = "Unable to decode header " + toHexString(header).toUpperCase();
+				errors.push("Unable to decode header " + toHexString(header).toUpperCase());
 				break;
 			}
 		}
 	} catch (error) {
-		decoded_data['error'] = "Fatal decoder error";
+		errors = "Fatal decoder error";
 	}
 
 	function slice(a, f, t) {
@@ -1573,12 +1572,6 @@ if (port === 10) {
 			res[i] = a[f + i];
 		}
 		return res;
-	}
-
-	function trunc(v){
-		v = +v;
-		if (!isFinite(v)) return v;
-		return (v - v % 1)   ||   (v < 0 ? -0 : v === 0 ? v : 0);
 	}
 
 	// Extracts bits from a byte array
@@ -1625,6 +1618,7 @@ if (port === 10) {
 		return array;
 	}
 
+	// Applies data type to a byte array
 	function apply_data_type(bytes, data_type) {
 		var output = 0;
 		if (data_type === "unsigned") {
@@ -1701,5 +1695,6 @@ if (port === 10) {
 		}
 		return arr;
 	}
-	return decoded_data;
-}
+    decoded_data["errors"] = errors;
+    return decoded_data;
+    }

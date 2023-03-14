@@ -1,42 +1,41 @@
-//DCG: v1.0.0
+	var decoded_data = {};
+	var decoder = [];
+	var errors = [];
+	var bytes = convertToUint8Array(bytes);
+	decoded_data['raw'] = toHexString(bytes).toUpperCase();
+	decoded_data['port'] = port;
 
-var decoded_data = {};
-var decoder = [];
-bytes = convertToUint8Array(bytes);
-decoded_data['raw'] = toHexString(bytes).toUpperCase();
-decoded_data['port'] = port;
-
-if(port === 101){
-	decoder = [
-		{
-			key: [],
-			fn: function(arg) { 
-				var size = arg.length;
-				var invalid_registers = [];
-				var responses = [];
-				while(arg.length > 0){
-					var downlink_fcnt = arg[0];
-					var num_invalid_writes = arg[1];
-					arg = arg.slice(2);
-					if(num_invalid_writes > 0) {
-						for(var i = 0; i < num_invalid_writes; i++){
-							invalid_registers.push("0x" + arg[i].toString(16));
+	if(port === 101){
+		decoder = [
+			{
+				key: [],
+				fn: function(arg) { 
+					var size = arg.length;
+					var invalid_registers = [];
+					var responses = [];
+					while(arg.length > 0){
+						var downlink_fcnt = arg[0];
+						var num_invalid_writes = arg[1];
+						arg = arg.slice(2);
+						if(num_invalid_writes > 0) {
+							for(var i = 0; i < num_invalid_writes; i++){
+								invalid_registers.push("0x" + arg[i].toString(16));
+							}
+							arg = arg.slice(num_invalid_writes);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
 						}
-						arg = arg.slice(num_invalid_writes);
-						responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+						else {
+							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+						}
+						invalid_registers = [];
 					}
-					else {
-						responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
-					}
-					invalid_registers = [];
+					decoded_data["response"] = responses;
+					return size;
 				}
-				decoded_data["response"] = responses;
-				return size;
 			}
-		}
-	];
-}
-
+		];
+	}
+	
 if (port === 100) {
 	decoder = [
 		{
@@ -450,24 +449,24 @@ if (port === 100) {
 				var val = decode_field(arg, 1, 4, 4, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['input_enable']['watermark1'] = "Disabled";
+						decoded_data['input_enable']['watermark1_enable'] = "Disabled";
 						break;
 					case 1:
-						decoded_data['input_enable']['watermark1'] = "Enabled";
+						decoded_data['input_enable']['watermark1_enable'] = "Enabled";
 						break;
 					default:
-						decoded_data['input_enable']['watermark1'] = "Invalid";
+						decoded_data['input_enable']['watermark1_enable'] = "Invalid";
 				}}
 				var val = decode_field(arg, 1, 5, 5, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['input_enable']['watermark2'] = "Disabled";
+						decoded_data['input_enable']['watermark2_enable'] = "Disabled";
 						break;
 					case 1:
-						decoded_data['input_enable']['watermark2'] = "Enabled";
+						decoded_data['input_enable']['watermark2_enable'] = "Enabled";
 						break;
 					default:
-						decoded_data['input_enable']['watermark2'] = "Invalid";
+						decoded_data['input_enable']['watermark2_enable'] = "Invalid";
 				}}
 				return 1;
 			}
@@ -767,20 +766,14 @@ if (port === 10) {
 		{
 			key: [0x00, 0xD3],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('battery_status')) {
-					decoded_data['battery_status'] = {};
-				}
-				decoded_data['battery_status']['rem_batt_capacity'] = decode_field(arg, 1, 6, 0, "unsigned");
+				decoded_data['rem_batt_capacity'] = decode_field(arg, 1, 6, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
 			key: [0x00, 0xBD],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('battery_status')) {
-					decoded_data['battery_status'] = {};
-				}
-				decoded_data['battery_status']['rem_batt_days'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['rem_batt_days'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
@@ -789,95 +782,135 @@ if (port === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				var output = 0;
-				if (val > 2781){
+				if (val > 1399){
 					output = "Dry";
-				} else if (val > 2776 && val <= 2781){
+				} else if (val > 1396 && val <= 1399){
 					output = 0.1;
-				} else if (val > 2771 && val <= 2776){
+				} else if (val > 1391 && val <= 1396){
 					output = 0.2;
-				} else if (val > 2766 && val <= 2771){
+				} else if (val > 1386 && val <= 1391){
 					output = 0.3;
-				} else if (val > 2761 && val <= 2766){
+				} else if (val > 1381 && val <= 1386){
 					output = 0.4;
-				} else if (val > 2756 && val <= 2761){
+				} else if (val > 1376 && val <= 1381){
 					output = 0.5;
-				} else if (val > 2751 && val <= 2756){
+				} else if (val > 1371 && val <= 1376){
 					output = 0.6;
-				} else if (val > 2746 && val <= 2751){
+				} else if (val > 1366 && val <= 1371){
 					output = 0.7;
-				} else if (val > 2741 && val <= 2746){
+				} else if (val > 1361 && val <= 1366){
 					output = 0.8;
-				} else if (val > 2736 && val <= 2741){
+				} else if (val > 1356 && val <= 1361){
 					output = 0.9;
-				} else if (val > 2731 && val <= 2736){
+				} else if (val > 1351 && val <= 1356){
 					output = 1.0;
-				} else if (val > 2726 && val <= 2731){
+				} else if (val > 1346 && val <= 1351){
 					output = 1.1;
-				} else if (val > 2721 && val <= 2726){
+				} else if (val > 1341 && val <= 1346){
 					output = 1.2;
 				} else {
 					output = "Wet";
 				}
-				decoded_data['soil_moisture'] = output;
-				decoded_data['soil_moisture_raw'] = val;
+				decoded_data['input1_frequency_to_moisture'] = output;
+				decoded_data['input1_frequency'] = val;
 				return 2;
 			}
 		},
 		{
 			key: [0x02, 0x02],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				var output = 2.39e-5 * Math.pow(val, 2) - 0.1011 * val + 77.34;
-				decoded_data['soil_temperature'] = output;
-				decoded_data['soil_temperature_raw'] = val;
+				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001);
+				var output = (((-31.78 * Math.pow(val, 5)) + (169.4 * Math.pow(val, 4)) + (-369.1 * Math.pow(val, 3)) + (425.2 * Math.pow(val, 2)) + (-311.6 * val) + 118)).toFixed(1);
+				decoded_data['Input2_voltage_to_temp'] = output;
+				decoded_data['Input2_voltage'] = val;
 				return 2;
 			}
 		},
 		{
 			key: [0x03, 0x02],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				decoded_data['Input3_voltage'] = val;
-				decoded_data['Input3_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input3_voltage'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
 				return 2;
 			}
 		},
 		{
 			key: [0x03, 0x67],
 			fn: function(arg) { 
-				decoded_data['Input3_temperature'] = (decode_field(arg, 2, 15, 0, "signed")*0.1).toFixed(1);
+				decoded_data['Input3_temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
 				return 2;
 			}
 		},
 		{
 			key: [0x04, 0x02],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
-				decoded_data['Input4_voltage'] = val;
-				decoded_data['Input4_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input4_voltage'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
 				return 2;
 			}
 		},
 		{
 			key: [0x04, 0x67],
 			fn: function(arg) { 
-				decoded_data['Input4_temperature'] = (decode_field(arg, 2, 15, 0, "signed")*0.1).toFixed(1);
+				decoded_data['Input4_temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
 				return 2;
 			}
 		},
 		{
 			key: [0x05, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark1_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				if (val > 6430){
+					output = 0;
+				} else if (val >= 4330 && val <= 6430){
+					output = 9.000 - (val - 4330.000) * 0.004286;
+				} else if (val >= 2820 && val < 4330){
+					output = 15.000 - (val - 2820.000) * 0.003974;
+				} else if (val >= 1110 && val < 2820){
+					output = 35.000 - (val - 1110.000) * 0.01170;
+				} else if (val >= 770 && val < 1110){
+					output = 55.000 - (val - 770.000) * 0.05884;
+				} else if (val >= 600 && val < 770){
+					output = 75.000 - (val - 600.000) * 0.1176;
+				} else if (val >= 485 && val < 600){
+					output = 100.000 - (val - 485.000) * 0.2174;
+				} else if (val >= 293 && val < 485){
+					output = 200.000 - (val - 293.000) * 0.5208;
+				} else{
+					output = 200;
+				}
+					
+				decoded_data['watermark1_tension'] = output;
+				decoded_data['watermark1_frequency'] = val;
 				return 2;
 			}
 		},
 		{
 			key: [0x06, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark2_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				if (val > 6430){
+					output = 0;
+				} else if (val >= 4330 && val <= 6430){
+					output = 9.000 - (val - 4330.000) * 0.004286;
+				} else if (val >= 2820 && val < 4330){
+					output = 15.000 - (val - 2820.000) * 0.003974;
+				} else if (val >= 1110 && val < 2820){
+					output = 35.000 - (val - 1110.000) * 0.01170;
+				} else if (val >= 770 && val < 1110){
+					output = 55.000 - (val - 770.000) * 0.05884;
+				} else if (val >= 600 && val < 770){
+					output = 75.000 - (val - 600.000) * 0.1176;
+				} else if (val >= 485 && val < 600){
+					output = 100.000 - (val - 485.000) * 0.2174;
+				} else if (val >= 293 && val < 485){
+					output = 200.000 - (val - 293.000) * 0.5208;
+				} else{
+					output = 200;
+				}
+					
+				decoded_data['watermark2_tension'] = output;
+				decoded_data['watermark2_frequency'] = val;
 				return 2;
 			}
 		},
@@ -965,7 +998,6 @@ if (port === 10) {
 	];
 }
 
-
 	try {
 		for (var bytes_left = bytes.length; bytes_left > 0;) {
 			var found = false;
@@ -984,12 +1016,12 @@ if (port === 10) {
 				}
 			}
 			if (!found) {
-				decoded_data['error'] = "Unable to decode header " + toHexString(header).toUpperCase();
+				errors.push("Unable to decode header " + toHexString(header).toUpperCase());
 				break;
 			}
 		}
 	} catch (error) {
-		decoded_data['error'] = "Fatal decoder error";
+		errors = "Fatal decoder error";
 	}
 
 	function slice(a, f, t) {
@@ -1121,4 +1153,5 @@ if (port === 10) {
 		}
 		return arr;
 	}
-	return decoded_data;
+    decoded_data["errors"] = errors;
+    return decoded_data;

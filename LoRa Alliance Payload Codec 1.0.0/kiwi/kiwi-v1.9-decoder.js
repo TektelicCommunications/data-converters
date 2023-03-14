@@ -38,7 +38,7 @@ function decodeUplink(input){
 		];
 	}
 
-if (input.fPort === 100) {
+if (port === 100) {
 	decoder = [
 		{
 			key: [0x10],
@@ -763,25 +763,37 @@ if (input.fPort === 100) {
 		},
 	];
 }
-if (input.fPort === 10) {
+if (port === 10) {
 	decoder = [
+		{
+			key: [0x00, 0xBA],
+			fn: function(arg) { 
+				var val = decode_field(arg, 1, 7, 7, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['eos_alert'] = "No Alarm";
+						break;
+					case 255:
+						decoded_data['eos_alert'] = "Alarm";
+						break;
+					default:
+						decoded_data['eos_alert'] = "Invalid";
+				}}
+				decoded_data['battery_voltage'] = (decode_field(arg, 1, 6, 0, "unsigned") * 0.01 + 2.5).toFixed(2);
+				return 1;
+			}
+		},
 		{
 			key: [0x00, 0xD3],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('battery_status')) {
-					decoded_data['battery_status'] = {};
-				}
-				decoded_data['battery_status']['rem_batt_capacity'] = decode_field(arg, 1, 6, 0, "unsigned");
+				decoded_data['rem_batt_capacity'] = decode_field(arg, 1, 6, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
 			key: [0x00, 0xBD],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('battery_status')) {
-					decoded_data['battery_status'] = {};
-				}
-				decoded_data['battery_status']['rem_batt_days'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['rem_batt_days'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
@@ -802,34 +814,32 @@ if (input.fPort === 10) {
 		{
 			key: [0x03, 0x02],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001);
 				decoded_data['Input3_voltage'] = val;
-				decoded_data['Input3_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input3_voltage_to_temp'] = ((-33.01 * Math.pow(val, 5)) + (217.4 * Math.pow(val, 4)) + (-538.6 * Math.pow(val, 3)) + (628.1 * Math.pow(val, 2)) + (-378.9 * val) + 102.9).toFixed(1);
 				return 2;
 			}
 		},
 		{
 			key: [0x03, 0x67],
 			fn: function(arg) { 
-				decoded_data['Input3_temperature'] = (decode_field(arg, 2, 15, 0, "signed")*0.1).toFixed(1);
+				decoded_data['Input3_temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
 				return 2;
 			}
 		},
 		{
 			key: [0x04, 0x02],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001);
 				decoded_data['Input4_voltage'] = val;
-				decoded_data['Input4_voltage_temp'] = (3.413e-7 * Math.pow(val, 4)) + (-0.0001843 * Math.pow(val, 3)) 
-				+ (0.03493 * Math.pow(val, 2)) + (-3.017*val) + 98.5;
+				decoded_data['Input4_voltage_to_temp'] = ((-33.01 * Math.pow(val, 5)) + (217.4 * Math.pow(val, 4)) + (-538.6 * Math.pow(val, 3)) + (628.1 * Math.pow(val, 2)) + (-378.9 * val) + 102.9).toFixed(1);
 				return 2;
 			}
 		},
 		{
 			key: [0x04, 0x67],
 			fn: function(arg) { 
-				decoded_data['Input4_temperature'] = (decode_field(arg, 2, 15, 0, "signed")*0.1).toFixed(1);
+				decoded_data['Input4_temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
 				return 2;
 			}
 		},
@@ -838,39 +848,29 @@ if (input.fPort === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				var output = 0;
-				{switch (val){
-					case (val > 6430):
-						output = 0;
-						break;
-					case (val >= 4330 && val <= 6430):
-						output = 9.000 - (val - 4330.000) * 0.004286;
-						break;
-					case (val >= 2820 && val < 4330):
-						output = 15.000 - (val - 2820.000) * 0.003974;
-						break;
-					case (val >= 1110 && val < 2820):
-						output = 35.000 - (val - 1110.000) * 0.01170;
-						break;
-					case (val >= 770 && val < 1110):
-						output = 55.000 - (val - 770.000) * 0.05884;
-						break;
-					case (val >= 600 && val < 770):
-						output = 75.000 - (val - 600.000) * 0.1176;
-						break;
-					case (val >= 485 && val < 600):
-						output = 100.000 - (val - 485.000) * 0.2174;
-						break;
-					case (val >= 293 && val < 485):
-						output = 200.000 - (val - 293.000) * 0.5208;
-						break;
-					default:
-						output = 200;
-		
-					decoded_data['watermark1_tension'] = output;
-					decoded_data['watermark1_tension_raw'] = val;
-					return 2;
-					}
+				if (val > 6430){
+					output = 0;
+				} else if (val >= 4330 && val <= 6430){
+					output = 9.000 - (val - 4330.000) * 0.004286;
+				} else if (val >= 2820 && val < 4330){
+					output = 15.000 - (val - 2820.000) * 0.003974;
+				} else if (val >= 1110 && val < 2820){
+					output = 35.000 - (val - 1110.000) * 0.01170;
+				} else if (val >= 770 && val < 1110){
+					output = 55.000 - (val - 770.000) * 0.05884;
+				} else if (val >= 600 && val < 770){
+					output = 75.000 - (val - 600.000) * 0.1176;
+				} else if (val >= 485 && val < 600){
+					output = 100.000 - (val - 485.000) * 0.2174;
+				} else if (val >= 293 && val < 485){
+					output = 200.000 - (val - 293.000) * 0.5208;
+				} else{
+					output = 200;
 				}
+					
+				decoded_data['watermark1_tension'] = output;
+				decoded_data['watermark1_frequency'] = val;
+				return 2;
 			}
 		},
 		{
@@ -878,39 +878,29 @@ if (input.fPort === 10) {
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				var output = 0;
-				{switch (val){
-					case (val > 6430):
-						output = 0;
-						break;
-					case (val >= 4330 && val <= 6430):
-						output = 9.000 - (val - 4330.000) * 0.004286;
-						break;
-					case (val >= 2820 && val < 4330):
-						output = 15.000 - (val - 2820.000) * 0.003974;
-						break;
-					case (val >= 1110 && val < 2820):
-						output = 35.000 - (val - 1110.000) * 0.01170;
-						break;
-					case (val >= 770 && val < 1110):
-						output = 55.000 - (val - 770.000) * 0.05884;
-						break;
-					case (val >= 600 && val < 770):
-						output = 75.000 - (val - 600.000) * 0.1176;
-						break;
-					case (val >= 485 && val < 600):
-						output = 100.000 - (val - 485.000) * 0.2174;
-						break;
-					case (val >= 293 && val < 485):
-						output = 200.000 - (val - 293.000) * 0.5208;
-						break;
-					default:
-						output = 200;
-		
-					decoded_data['watermark2_tension'] = output;
-					decoded_data['watermark2_tension_raw'] = val;
-					return 2;
-					}
+				if (val > 6430){
+					output = 0;
+				} else if (val >= 4330 && val <= 6430){
+					output = 9.000 - (val - 4330.000) * 0.004286;
+				} else if (val >= 2820 && val < 4330){
+					output = 15.000 - (val - 2820.000) * 0.003974;
+				} else if (val >= 1110 && val < 2820){
+					output = 35.000 - (val - 1110.000) * 0.01170;
+				} else if (val >= 770 && val < 1110){
+					output = 55.000 - (val - 770.000) * 0.05884;
+				} else if (val >= 600 && val < 770){
+					output = 75.000 - (val - 600.000) * 0.1176;
+				} else if (val >= 485 && val < 600){
+					output = 100.000 - (val - 485.000) * 0.2174;
+				} else if (val >= 293 && val < 485){
+					output = 200.000 - (val - 293.000) * 0.5208;
+				} else{
+					output = 200;
 				}
+					
+				decoded_data['watermark2_tension'] = output;
+				decoded_data['watermark2_frequency'] = val;
+				return 2;
 			}
 		},
 		{
@@ -996,7 +986,6 @@ if (input.fPort === 10) {
 		},
 	];
 }
-
 
 	try {
 		for (var bytes_left = bytes.length; bytes_left > 0;) {
@@ -1157,7 +1146,7 @@ if (input.fPort === 10) {
     var output = {
         "data": decoded_data,
 		"errors": errors,
-		"warnings": []
+		"warnings": [],
     };
 
     return output;

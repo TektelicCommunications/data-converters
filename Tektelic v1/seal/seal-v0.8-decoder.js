@@ -1,10 +1,9 @@
-//DCG: v1.0.0
-
-var decoded_data = {};
-var decoder = [];
-bytes = convertToUint8Array(bytes);
-decoded_data['raw'] = toHexString(bytes).toUpperCase();
-decoded_data['port'] = port;
+	var decoded_data = {};
+	var decoder = [];
+	var errors = [];
+	var bytes = convertToUint8Array(bytes);
+	decoded_data['raw'] = toHexString(bytes).toUpperCase();
+	decoded_data['port'] = port;
 
 	if(port === 101){
 		decoder = [
@@ -36,7 +35,7 @@ decoded_data['port'] = port;
 			}
 		];
 	}
-
+	
 if (port === 10) {
 	decoder = [
 		{
@@ -83,7 +82,7 @@ if (port === 10) {
 				}
 				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.0000107).toFixed(7);
 				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.0000215).toFixed(7);
-				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.145 - 500).toFixed(3);
+				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.145 + 500).toFixed(3);
 				return 8;
 			}
 		},
@@ -1173,29 +1172,28 @@ if (port === 15) {
 				}
 				decoded_data['log_all']['fragment_number_3'] = decode_field(arg, 13, 103, 96, "unsigned");
 					var data = [];
-					arg = arg.slice(1);
 					var loop = arg.length / 12;
 					for (var i = 0; i < loop; i++) {
 						var group = {};
+						group['fragment_number_3'] = decode_field(arg, 12, 103, 96, "unsigned");
 						group['year_3'] = decode_field(arg, 12, 95, 90, "unsigned");
 						group['month_3'] = decode_field(arg, 12, 89, 86, "unsigned");
 						group['day_3'] = decode_field(arg, 12, 85, 81, "unsigned");
 						group['hour_3'] = decode_field(arg, 12, 80, 76, "unsigned");
 						group['minute_3'] = decode_field(arg, 12, 75, 70, "unsigned");
 						group['second_3'] = decode_field(arg, 12, 69, 64, "unsigned");
-						group['lattitude_3'] = (decode_field(arg, 12, 63, 40, "signed") * 0.0000125).toFixed(6);
-						group['longitude_3'] = (decode_field(arg, 12, 39, 16, "signed") * 0.0000001).toFixed(7);
-						group['altitude_3'] = (decode_field(arg, 12, 15, 0, "signed") * 0.5).toFixed(1);
+						group['lattitude_3'] = decode_field(arg, 12, 63, 40, "signed");
+						group['longitude_3'] = decode_field(arg, 12, 39, 16, "signed");
+						group['altitude_3'] = decode_field(arg, 12, 15, 0, "signed");
 						data.push(group);
 						arg = arg.slice(12);
 					}
 					decoded_data['log_all'] = data;
-					return loop*12 + 1;
+					return loop*12;
 			}
 		},
 	];
 }
-
 
 	try {
 		for (var bytes_left = bytes.length; bytes_left > 0;) {
@@ -1215,12 +1213,12 @@ if (port === 15) {
 				}
 			}
 			if (!found) {
-				decoded_data['error'] = "Unable to decode header " + toHexString(header).toUpperCase();
+				errors.push("Unable to decode header " + toHexString(header).toUpperCase());
 				break;
 			}
 		}
 	} catch (error) {
-		decoded_data['error'] = "Fatal decoder error";
+		errors = "Fatal decoder error";
 	}
 
 	function slice(a, f, t) {
@@ -1352,4 +1350,5 @@ if (port === 15) {
 		}
 		return arr;
 	}
-	return decoded_data;
+    decoded_data["errors"] = errors;
+    return decoded_data;

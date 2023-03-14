@@ -38,7 +38,7 @@ function decodeUplink(input){
 		];
 	}
 
-if (input.fPort === 100) {
+if (port === 100) {
 	decoder = [
 		{
 			key: [0x00],
@@ -1352,7 +1352,7 @@ if (input.fPort === 100) {
 		},
 	];
 }
-if (input.fPort === 10) {
+if (port === 10) {
 	decoder = [
 		{
 			key: [0x00, 0xFF],
@@ -1541,7 +1541,6 @@ if (input.fPort === 10) {
 	];
 }
 
-
 	try {
 		for (var bytes_left = bytes.length; bytes_left > 0;) {
 			var found = false;
@@ -1574,12 +1573,6 @@ if (input.fPort === 10) {
 			res[i] = a[f + i];
 		}
 		return res;
-	}
-
-	function trunc(v){
-		v = +v;
-		if (!isFinite(v)) return v;
-		return (v - v % 1)   ||   (v < 0 ? -0 : v === 0 ? v : 0);
 	}
 
 	// Extracts bits from a byte array
@@ -1626,6 +1619,7 @@ if (input.fPort === 10) {
 		return array;
 	}
 
+	// Applies data type to a byte array
 	function apply_data_type(bytes, data_type) {
 		var output = 0;
 		if (data_type === "unsigned") {
@@ -1706,7 +1700,7 @@ if (input.fPort === 10) {
     var output = {
         "data": decoded_data,
 		"errors": errors,
-		"warnings": []
+		"warnings": [],
     };
 
     return output;

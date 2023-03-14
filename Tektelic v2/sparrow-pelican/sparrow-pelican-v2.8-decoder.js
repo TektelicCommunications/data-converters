@@ -1,5 +1,3 @@
-//function decodeUplink(input){
-
 	var decoded_data = {};
 	var decoder = [];
 	var errors = [];
@@ -38,7 +36,7 @@
 		];
 	}
 
-if (input.fPort === 100) {
+if (port === 100) {
 	decoder = [
 		{
 			key: [0x00],
@@ -723,7 +721,7 @@ if (input.fPort === 100) {
 		{
 			key: [0x5F],
 			fn: function(arg) { 
-				decoded_data['mac_address'] = decode_field(arg, 6, 47, 0, "unsigned");
+				decoded_data['mac_address'] = decode_field(arg, 6, 47, 0, "hexstring");
 				return 6;
 			}
 		},
@@ -818,7 +816,7 @@ if (input.fPort === 100) {
 		},
 	];
 }
-if (input.fPort === 25) {
+if (port === 25) {
 	decoder = [
 		{
 			key: [0x0A],
@@ -917,7 +915,7 @@ if (input.fPort === 25) {
 		},
 	];
 }
-if (input.fPort === 10) {
+if (port === 10) {
 	decoder = [
 		{
 			key: [0x00, 0xBA],
@@ -978,7 +976,6 @@ if (input.fPort === 10) {
 		},
 	];
 }
-
 
 	try {
 		for (var bytes_left = bytes.length; bytes_left > 0;) {
@@ -1144,4 +1141,3 @@ if (input.fPort === 10) {
     };
 
     return output;
-//}
