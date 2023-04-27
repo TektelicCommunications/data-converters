@@ -158,6 +158,8 @@ if (input.fPort === 10) {
 	];
 }
 if (input.fPort === 32) {
+	decoded_data['tag_entry'] = decode_field(arg, 2, 15, 0, "unsigned");
+	bytes = bytes.slice(2);
 	decoder = [
 		{
 			key: [0x03, 0x67],
@@ -184,13 +186,6 @@ if (input.fPort === 32) {
 			key: [0x02, 0x67],
 			fn: function(arg) { 
 				decoded_data['tagged_ext_probe_temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
-				return 2;
-			}
-		},
-		{
-			key: [],
-			fn: function(arg) { 
-				decoded_data['tag_entry'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
