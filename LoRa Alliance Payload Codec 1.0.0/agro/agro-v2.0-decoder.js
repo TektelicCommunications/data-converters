@@ -244,7 +244,7 @@ if (input.fPort === 100) {
 		{
 			key: [0x2F],
 			fn: function(arg) { 
-				decoded_data['tick_per_barometer_pressure'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['RFU_1'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
@@ -543,13 +543,13 @@ if (input.fPort === 100) {
 				var val = decode_field(arg, 1, 0, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['interrupt_enabled'] = "Disabled";
+						decoded_data['ALS_interrupt_enabled'] = "Disabled";
 						break;
 					case 1:
-						decoded_data['interrupt_enabled'] = "Enabled";
+						decoded_data['ALS_interrupt_enabled'] = "Enabled";
 						break;
 					default:
-						decoded_data['interrupt_enabled'] = "Invalid";
+						decoded_data['ALS_interrupt_enabled'] = "Invalid";
 				}}
 				return 1;
 			}
@@ -557,21 +557,21 @@ if (input.fPort === 100) {
 		{
 			key: [0x49],
 			fn: function(arg) { 
-				decoded_data['upper_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['ALS_upper_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x4A],
 			fn: function(arg) { 
-				decoded_data['lower_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['ALS_lower_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x4B],
 			fn: function(arg) { 
-				decoded_data['light_sample_period_inactive'] = decode_field(arg, 4, 31, 0, "unsigned");
+				decoded_data['light_sample_period_idle'] = decode_field(arg, 4, 31, 0, "unsigned");
 				return 4;
 			}
 		},
@@ -839,17 +839,19 @@ if (input.fPort === 10) {
 		{
 			key: [0x02, 0x02],
 			fn: function(arg) { 
-				var val = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
-				var output = (-32.46 * Math.log(val*1000)) + 236.36
-				decoded_data['input2_voltage_to_temp'] = output.toFixed(1);
-				decoded_data['input2_voltage'] = val;
+				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001).toFixed(3);
+				var output = (-32.46 * Math.log(val*1000) + 236.36).toFixed(1);
+				decoded_data['Input2_voltage_to_temp'] = output;
+				decoded_data['Input2_voltage'] = val;
 				return 2;
 			}
 		},
 		{
 			key: [0x03, 0x02],
 			fn: function(arg) { 
-				decoded_data['Input3_voltage'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
+				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001).toFixed(3);
+				decoded_data['Input3_voltage'] = val;
+				decoded_data['Input3_voltage_to_temp'] = ((-33.01 * Math.pow(val, 5)) + (217.4 * Math.pow(val, 4)) + (-538.6 * Math.pow(val, 3)) + (628.1 * Math.pow(val, 2)) + (-378.9 * val) + 102.9).toFixed(1);
 				return 2;
 			}
 		},
@@ -863,7 +865,9 @@ if (input.fPort === 10) {
 		{
 			key: [0x04, 0x02],
 			fn: function(arg) { 
-				decoded_data['Input4_voltage'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
+				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001).toFixed(3);
+				decoded_data['Input4_voltage'] = val;
+				decoded_data['Input4_voltage_to_temp'] = ((-33.01 * Math.pow(val, 5)) + (217.4 * Math.pow(val, 4)) + (-538.6 * Math.pow(val, 3)) + (628.1 * Math.pow(val, 2)) + (-378.9 * val) + 102.9).toFixed(1);
 				return 2;
 			}
 		},
@@ -877,16 +881,59 @@ if (input.fPort === 10) {
 		{
 			key: [0x05, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark1_frequency'] = decode_field(arg, 2, 15, 0, "unsigned");
-				decoded_data['watermark1_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				if (val > 6430){
+					output = 0;
+				} else if (val >= 4330 && val <= 6430){
+					output = (9.000 - (val - 4330.000) * 0.004286).toFixed(0);
+				} else if (val >= 2820 && val < 4330){
+					output = (15.000 - (val - 2820.000) * 0.003974).toFixed(0);
+				} else if (val >= 1110 && val < 2820){
+					output = (35.000 - (val - 1110.000) * 0.01170).toFixed(0);
+				} else if (val >= 770 && val < 1110){
+					output = (55.000 - (val - 770.000) * 0.05884).toFixed(0);
+				} else if (val >= 600 && val < 770){
+					output = (75.000 - (val - 600.000) * 0.1176).toFixed(0);
+				} else if (val >= 485 && val < 600){
+					output = (100.000 - (val - 485.000) * 0.2174).toFixed(0);
+				} else if (val >= 293 && val < 485){
+					output = (200.000 - (val - 293.000) * 0.5208).toFixed(0);
+				} else{
+					output = 200;
+				}					
+				decoded_data['watermark1_tension'] = output;
+				decoded_data['watermark1_frequency'] = val;
 				return 2;
 			}
 		},
 		{
 			key: [0x06, 0x04],
 			fn: function(arg) { 
-				decoded_data['watermark2_frequency'] = decode_field(arg, 2, 15, 0, "unsigned");
-				decoded_data['watermark2_tension'] = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				if (val > 6430){
+					output = 0;
+				} else if (val >= 4330 && val <= 6430){
+					output = (9.000 - (val - 4330.000) * 0.004286).toFixed(0);
+				} else if (val >= 2820 && val < 4330){
+					output = (15.000 - (val - 2820.000) * 0.003974).toFixed(0);
+				} else if (val >= 1110 && val < 2820){
+					output = (35.000 - (val - 1110.000) * 0.01170).toFixed(0);
+				} else if (val >= 770 && val < 1110){
+					output = (55.000 - (val - 770.000) * 0.05884).toFixed(0);
+				} else if (val >= 600 && val < 770){
+					output = (75.000 - (val - 600.000) * 0.1176).toFixed(0);
+				} else if (val >= 485 && val < 600){
+					output = (100.000 - (val - 485.000) * 0.2174).toFixed(0);
+				} else if (val >= 293 && val < 485){
+					output = (200.000 - (val - 293.000) * 0.5208).toFixed(0);
+				} else{
+					output = 200;
+				}
+					
+				decoded_data['watermark2_tension'] = output;
+				decoded_data['watermark2_frequency'] = val;
 				return 2;
 			}
 		},
@@ -967,7 +1014,7 @@ if (input.fPort === 10) {
 		{
 			key: [0x0D, 0x73],
 			fn: function(arg) { 
-				decoded_data['barometric_pressure'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.1).toFixed(1);
+				decoded_data['RFU_2'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.1).toFixed(1);
 				return 2;
 			}
 		},

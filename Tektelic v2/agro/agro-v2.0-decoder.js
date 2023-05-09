@@ -1,13 +1,10 @@
-function Decoder(bytes, port) {
 	var decoded_data = {};
 	var decoder = [];
 	var errors = [];
-	var bytes = convertToUint8Array(bytes);
+	var bytes = convertToUint8Array(input.bytes);
 	decoded_data['raw'] = toHexString(bytes).toUpperCase();
-	decoded_data['port'] = port;
-	var input = {
-		"fPort": port,
-	}
+	decoded_data['fPort'] = input.fPort;
+
 	if(input.fPort === 101){
 		decoder = [
 			{
@@ -38,7 +35,7 @@ function Decoder(bytes, port) {
 			}
 		];
 	}
-	
+
 if (input.fPort === 100) {
 	decoder = [
 		{
@@ -245,7 +242,7 @@ if (input.fPort === 100) {
 		{
 			key: [0x2F],
 			fn: function(arg) { 
-				decoded_data['tick_per_barometer_pressure'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['RFU_1'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
@@ -452,24 +449,24 @@ if (input.fPort === 100) {
 				var val = decode_field(arg, 1, 4, 4, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['input_enable']['watermark1'] = "Disabled";
+						decoded_data['input_enable']['watermark1_enable'] = "Disabled";
 						break;
 					case 1:
-						decoded_data['input_enable']['watermark1'] = "Enabled";
+						decoded_data['input_enable']['watermark1_enable'] = "Enabled";
 						break;
 					default:
-						decoded_data['input_enable']['watermark1'] = "Invalid";
+						decoded_data['input_enable']['watermark1_enable'] = "Invalid";
 				}}
 				var val = decode_field(arg, 1, 5, 5, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['input_enable']['watermark2'] = "Disabled";
+						decoded_data['input_enable']['watermark2_enable'] = "Disabled";
 						break;
 					case 1:
-						decoded_data['input_enable']['watermark2'] = "Enabled";
+						decoded_data['input_enable']['watermark2_enable'] = "Enabled";
 						break;
 					default:
-						decoded_data['input_enable']['watermark2'] = "Invalid";
+						decoded_data['input_enable']['watermark2_enable'] = "Invalid";
 				}}
 				return 1;
 			}
@@ -544,13 +541,13 @@ if (input.fPort === 100) {
 				var val = decode_field(arg, 1, 0, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['interrupt_enabled'] = "Disabled";
+						decoded_data['ALS_interrupt_enabled'] = "Disabled";
 						break;
 					case 1:
-						decoded_data['interrupt_enabled'] = "Enabled";
+						decoded_data['ALS_interrupt_enabled'] = "Enabled";
 						break;
 					default:
-						decoded_data['interrupt_enabled'] = "Invalid";
+						decoded_data['ALS_interrupt_enabled'] = "Invalid";
 				}}
 				return 1;
 			}
@@ -558,21 +555,21 @@ if (input.fPort === 100) {
 		{
 			key: [0x49],
 			fn: function(arg) { 
-				decoded_data['upper_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['ALS_upper_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x4A],
 			fn: function(arg) { 
-				decoded_data['lower_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['ALS_lower_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x4B],
 			fn: function(arg) { 
-				decoded_data['light_sample_period_inactive'] = decode_field(arg, 4, 31, 0, "unsigned");
+				decoded_data['light_sample_period_idle'] = decode_field(arg, 4, 31, 0, "unsigned");
 				return 4;
 			}
 		},
@@ -801,14 +798,49 @@ if (input.fPort === 10) {
 		{
 			key: [0x01, 0x04],
 			fn: function(arg) { 
-				decoded_data['input1_frequency'] = decode_field(arg, 2, 15, 0, "unsigned");
+				var val = decode_field(arg, 2, 15, 0, "unsigned");
+				var output = 0;
+				if (val > 1399){
+					output = "Dry";
+				} else if (val > 1396 && val <= 1399){
+					output = 0.1;
+				} else if (val > 1391 && val <= 1396){
+					output = 0.2;
+				} else if (val > 1386 && val <= 1391){
+					output = 0.3;
+				} else if (val > 1381 && val <= 1386){
+					output = 0.4;
+				} else if (val > 1376 && val <= 1381){
+					output = 0.5;
+				} else if (val > 1371 && val <= 1376){
+					output = 0.6;
+				} else if (val > 1366 && val <= 1371){
+					output = 0.7;
+				} else if (val > 1361 && val <= 1366){
+					output = 0.8;
+				} else if (val > 1356 && val <= 1361){
+					output = 0.9;
+				} else if (val > 1351 && val <= 1356){
+					output = 1.0;
+				} else if (val > 1346 && val <= 1351){
+					output = 1.1;
+				} else if (val > 1341 && val <= 1346){
+					output = 1.2;
+				} else {
+					output = "Wet";
+				}
+				decoded_data['input1_frequency_to_moisture'] = output;
+				decoded_data['input1_frequency'] = val;
 				return 2;
 			}
 		},
 		{
 			key: [0x02, 0x02],
 			fn: function(arg) { 
-				decoded_data['input2_voltage'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
+				var val = (decode_field(arg, 2, 15, 0, "unsigned")*0.001).toFixed(3);
+				var output = (-32.46 * Math.log(val*1000) + 236.36).toFixed(1);
+				decoded_data['Input2_voltage_to_temp'] = output;
+				decoded_data['Input2_voltage'] = val;
 				return 2;
 			}
 		},
@@ -852,23 +884,22 @@ if (input.fPort === 10) {
 				if (val > 6430){
 					output = 0;
 				} else if (val >= 4330 && val <= 6430){
-					output = 9.000 - (val - 4330.000) * 0.004286;
+					output = (9.000 - (val - 4330.000) * 0.004286).toFixed(0);
 				} else if (val >= 2820 && val < 4330){
-					output = 15.000 - (val - 2820.000) * 0.003974;
+					output = (15.000 - (val - 2820.000) * 0.003974).toFixed(0);
 				} else if (val >= 1110 && val < 2820){
-					output = 35.000 - (val - 1110.000) * 0.01170;
+					output = (35.000 - (val - 1110.000) * 0.01170).toFixed(0);
 				} else if (val >= 770 && val < 1110){
-					output = 55.000 - (val - 770.000) * 0.05884;
+					output = (55.000 - (val - 770.000) * 0.05884).toFixed(0);
 				} else if (val >= 600 && val < 770){
-					output = 75.000 - (val - 600.000) * 0.1176;
+					output = (75.000 - (val - 600.000) * 0.1176).toFixed(0);
 				} else if (val >= 485 && val < 600){
-					output = 100.000 - (val - 485.000) * 0.2174;
+					output = (100.000 - (val - 485.000) * 0.2174).toFixed(0);
 				} else if (val >= 293 && val < 485){
-					output = 200.000 - (val - 293.000) * 0.5208;
+					output = (200.000 - (val - 293.000) * 0.5208).toFixed(0);
 				} else{
 					output = 200;
-				}
-					
+				}					
 				decoded_data['watermark1_tension'] = output;
 				decoded_data['watermark1_frequency'] = val;
 				return 2;
@@ -882,19 +913,19 @@ if (input.fPort === 10) {
 				if (val > 6430){
 					output = 0;
 				} else if (val >= 4330 && val <= 6430){
-					output = 9.000 - (val - 4330.000) * 0.004286;
+					output = (9.000 - (val - 4330.000) * 0.004286).toFixed(0);
 				} else if (val >= 2820 && val < 4330){
-					output = 15.000 - (val - 2820.000) * 0.003974;
+					output = (15.000 - (val - 2820.000) * 0.003974).toFixed(0);
 				} else if (val >= 1110 && val < 2820){
-					output = 35.000 - (val - 1110.000) * 0.01170;
+					output = (35.000 - (val - 1110.000) * 0.01170).toFixed(0);
 				} else if (val >= 770 && val < 1110){
-					output = 55.000 - (val - 770.000) * 0.05884;
+					output = (55.000 - (val - 770.000) * 0.05884).toFixed(0);
 				} else if (val >= 600 && val < 770){
-					output = 75.000 - (val - 600.000) * 0.1176;
+					output = (75.000 - (val - 600.000) * 0.1176).toFixed(0);
 				} else if (val >= 485 && val < 600){
-					output = 100.000 - (val - 485.000) * 0.2174;
+					output = (100.000 - (val - 485.000) * 0.2174).toFixed(0);
 				} else if (val >= 293 && val < 485){
-					output = 200.000 - (val - 293.000) * 0.5208;
+					output = (200.000 - (val - 293.000) * 0.5208).toFixed(0);
 				} else{
 					output = 200;
 				}
@@ -981,7 +1012,7 @@ if (input.fPort === 10) {
 		{
 			key: [0x0D, 0x73],
 			fn: function(arg) { 
-				decoded_data['barometric_pressure'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.1).toFixed(1);
+				decoded_data['RFU_2'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.1).toFixed(1);
 				return 2;
 			}
 		},
@@ -1143,6 +1174,12 @@ if (input.fPort === 10) {
 		}
 		return arr;
 	}
-    decoded_data["errors"] = errors;
-    return decoded_data;
-    }
+
+    var output = {
+        "data": decoded_data,
+		"errors": errors,
+		"warnings": [],
+		"tektelicMetadata": input.tektelicMetadata
+    };
+
+    return output;
