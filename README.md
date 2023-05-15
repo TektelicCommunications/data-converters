@@ -2,13 +2,14 @@
 This repository contains the data converters that are to be used on TEKTELIC & other Network Server for TEKTELIC Sensors. These data converters can be used as a reference for other platforms.
 
 ### Available Sensors
-- AGRO (CLOVER, FARM, GREENHOUSE, KIWI)
 - AURA
 - BREEZE
+- CLOVER
 - COMFORT
 - EDOCTOR
 - FLUX
 - INDUSTRIAL TRANSCEIVER
+- KIWI
 - ORCA
 - PELICAN
 - PELICAN EX
