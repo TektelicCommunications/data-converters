@@ -161,7 +161,7 @@ if (input.fPort === 10) {
 	];
 }
 if (input.fPort === 32) {
-	decoded_data['tag_entry'] = decode_field(arg, 2, 15, 0, "unsigned");
+	decoded_data['tag_entry'] = decode_field(bytes, 2, 15, 0, "unsigned");
 	bytes = bytes.slice(2);
 	decoder = [
 		{
