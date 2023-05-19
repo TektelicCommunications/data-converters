@@ -586,7 +586,7 @@ if (port === 100) {
 						decoded_data['metadata']['region'] = "EU868";
 						break;
 					case 1:
-						decoded_data['metadata']['region'] = "US916";
+						decoded_data['metadata']['region'] = "US915";
 						break;
 					case 2:
 						decoded_data['metadata']['region'] = "AS923";

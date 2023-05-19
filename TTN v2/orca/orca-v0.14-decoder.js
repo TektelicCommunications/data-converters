@@ -802,7 +802,7 @@ if (input.fPort === 100) {
 						decoded_data['metadata']['loramac_region'] = "EU868";
 						break;
 					case 1:
-						decoded_data['metadata']['loramac_region'] = "US916";
+						decoded_data['metadata']['loramac_region'] = "US915";
 						break;
 					case 2:
 						decoded_data['metadata']['loramac_region'] = "AS923";
