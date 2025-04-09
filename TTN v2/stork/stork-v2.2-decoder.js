@@ -1103,7 +1103,7 @@ if (input.fPort === 192) {
 if (input.fPort === 197) {
 	decoder = [
 		{
-			key: [0x01],
+			key: [0x00],
 			fn: function(arg) { 
 					var data = [];
 					var loop = arg.length / 7;

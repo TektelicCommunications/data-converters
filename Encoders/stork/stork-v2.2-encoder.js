@@ -1178,7 +1178,7 @@ function encodeDownlink(input) {
             "or_80_to_write": 1
         },
         "rssi": {
-            "header": "0x01",
+            "header": "0x00",
             "data_size": 7,
             "bit_start": 55,
             "bit_end": 48,
@@ -1191,7 +1191,7 @@ function encodeDownlink(input) {
             "or_80_to_write": 1
         },
         "mac_addr": {
-            "header": "0x01",
+            "header": "0x00",
             "data_size": 7,
             "bit_start": 47,
             "bit_end": 0,
