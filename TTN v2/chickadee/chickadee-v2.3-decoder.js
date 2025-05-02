@@ -133,6 +133,7 @@ if (input.fPort === 10) {
 					default:
 						decoded_data['acceleration_alarm'] = "Invalid";
 				}}
+				decoded_data['gnss_fix'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
@@ -153,6 +154,40 @@ if (input.fPort === 10) {
 			fn: function(arg) { 
 				decoded_data['temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
 				return 2;
+			}
+		},
+		{
+			key: [0x00, 0x85],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('utc_timestamp')) {
+					decoded_data['utc_timestamp'] = {};
+				}
+				decoded_data['utc_timestamp']['year_utc'] = decode_field(arg, 4, 31, 26, "unsigned");
+				decoded_data['utc_timestamp']['month_utc'] = decode_field(arg, 4, 25, 22, "unsigned");
+				decoded_data['utc_timestamp']['day_utc'] = decode_field(arg, 4, 21, 17, "unsigned");
+				decoded_data['utc_timestamp']['hour_utc'] = decode_field(arg, 4, 16, 12, "unsigned");
+				decoded_data['utc_timestamp']['minute_utc'] = decode_field(arg, 4, 11, 6, "unsigned");
+				decoded_data['utc_timestamp']['second_utc'] = decode_field(arg, 4, 5, 0, "unsigned");
+				return 4;
+			}
+		},
+		{
+			key: [0x00, 0x88],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('coordinates')) {
+					decoded_data['coordinates'] = {};
+				}
+				decoded_data['coordinates']['latitude_coords'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
+				decoded_data['coordinates']['longitude_coords'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
+				decoded_data['coordinates']['altitude_coords'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.144958496 + -500).toFixed(2);
+				return 8;
+			}
+		},
+		{
+			key: [0x00, 0x92],
+			fn: function(arg) { 
+				decoded_data['ground_speed'] = (decode_field(arg, 1, 7, 0, "unsigned") * 0.27778).toFixed(3);
+				return 1;
 			}
 		},
 	];
@@ -503,10 +538,10 @@ if (input.fPort === 100) {
 					case 1:
 						decoded_data['geolocation_strategy']['scan_order_logic'] = "B";
 						break;
-					case 3:
+					case 2:
 						decoded_data['geolocation_strategy']['scan_order_logic'] = "C";
 						break;
-					case 4:
+					case 3:
 						decoded_data['geolocation_strategy']['scan_order_logic'] = "D";
 						break;
 					default:
@@ -589,7 +624,7 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('assist_coordinates_type')) {
 					decoded_data['assist_coordinates_type'] = {};
 				}
-				decoded_data['assist_coordinates_type']['latitude'] = decode_field(arg, 8, 63, 40, "unsigned");
+				decoded_data['assist_coordinates_type']['latitude_gnss'] = decode_field(arg, 8, 63, 40, "unsigned");
 				return 8;
 			}
 		},
@@ -917,14 +952,14 @@ if (input.fPort === 100) {
 		{
 			key: [0x52],
 			fn: function(arg) { 
-				decoded_data['ble_scan_interval'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
+				decoded_data['ble_scan_interval'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x53],
 			fn: function(arg) { 
-				decoded_data['ble_scan_window'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
+				decoded_data['ble_scan_window'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
@@ -1165,7 +1200,7 @@ if (input.fPort === 100) {
 						decoded_data['metadata']['loramac_region_id'] = "EU868";
 						break;
 					case 1:
-						decoded_data['metadata']['loramac_region_id'] = "US916";
+						decoded_data['metadata']['loramac_region_id'] = "US915";
 						break;
 					case 2:
 						decoded_data['metadata']['loramac_region_id'] = "AS923";
