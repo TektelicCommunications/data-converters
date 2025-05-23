@@ -1083,6 +1083,9 @@ if (input.fPort === 192) {
 		{
 			key: [0x00],
 			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('mac_addr')) {
+					decoded_data['mac_addr'] = {};
+				}
 					var data = [];
 					var loop = arg.length / 6;
 					for (var i = 0; i < loop; i++) {
@@ -1091,7 +1094,7 @@ if (input.fPort === 192) {
 						data.push(group);
 						arg = arg.slice(6);
 					}
-					decoded_data = data;
+					decoded_data['mac_addr'] = data;
 					return loop*6;
 			}
 		},
@@ -1100,8 +1103,11 @@ if (input.fPort === 192) {
 if (input.fPort === 197) {
 	decoder = [
 		{
-			key: [0x00],
+			key: [0x01],
 			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('wifi_mw_payload_mac_rssi')) {
+					decoded_data['wifi_mw_payload_mac_rssi'] = {};
+				}
 					var data = [];
 					var loop = arg.length / 7;
 					for (var i = 0; i < loop; i++) {
@@ -1111,7 +1117,7 @@ if (input.fPort === 197) {
 						data.push(group);
 						arg = arg.slice(7);
 					}
-					decoded_data = data;
+					decoded_data['wifi_mw_payload_mac_rssi'] = data;
 					return loop*7;
 			}
 		},

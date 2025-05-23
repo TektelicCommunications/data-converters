@@ -1164,44 +1164,45 @@ function encodeDownlink(input) {
         }
     },
     "general": {
-        "mac_addr_only": {
-            "header": "0x00",
-            "data_size": 6,
-            "bit_start": 47,
-            "bit_end": 0,
-            "type": "hexstring",
-            "round": "",
-            "coefficient": 1,
-            "access": "R",
-            "multiple": 1,
-            "port": 192,
-            "or_80_to_write": 1
-        },
-        "rssi": {
-            "header": "0x00",
-            "data_size": 7,
-            "bit_start": 55,
-            "bit_end": 48,
-            "type": "signed",
-            "round": "",
-            "coefficient": 1,
-            "access": "R",
-            "multiple": 1,
-            "port": 197,
-            "or_80_to_write": 1
-        },
         "mac_addr": {
             "header": "0x00",
-            "data_size": 7,
-            "bit_start": 47,
-            "bit_end": 0,
-            "type": "hexstring",
-            "round": "",
-            "coefficient": 1,
-            "access": "R",
-            "multiple": 1,
+            "or_80_to_write": 1,
+            "port": 192,
+            "mac_addr_only": {
+                "data_size": 6,
+                "bit_start": 47,
+                "bit_end": 0,
+                "type": "hexstring",
+                "round": "",
+                "coefficient": 1,
+                "access": "R",
+                "multiple": 1
+            }
+        },
+        "wifi_mw_payload_mac_rssi": {
+            "header": "0x01",
+            "or_80_to_write": 1,
             "port": 197,
-            "or_80_to_write": 1
+            "rssi": {
+                "data_size": 7,
+                "bit_start": 55,
+                "bit_end": 48,
+                "type": "signed",
+                "round": "",
+                "coefficient": 1,
+                "access": "R",
+                "multiple": 1
+            },
+            "mac_addr": {
+                "data_size": 7,
+                "bit_start": 47,
+                "bit_end": 0,
+                "type": "hexstring",
+                "round": "",
+                "coefficient": 1,
+                "access": "R",
+                "multiple": 1
+            }
         }
     }
 }
