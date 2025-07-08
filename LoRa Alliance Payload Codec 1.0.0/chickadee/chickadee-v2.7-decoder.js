@@ -1,3 +1,5 @@
+function decodeUplink(input){
+
 	var decoded_data = {};
 	var decoder = [];
 	var errors = [];
@@ -174,9 +176,9 @@ if (input.fPort === 10) {
 				if(!decoded_data.hasOwnProperty('coordinates')) {
 					decoded_data['coordinates'] = {};
 				}
-				decoded_data['coordinates']['latitude_coords'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
-				decoded_data['coordinates']['longitude_coords'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
-				decoded_data['coordinates']['altitude_coords'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.144958496 + -500).toFixed(2);
+				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * (90 / Math.pow(2, 23))).toFixed(7);
+				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * (180 / Math.pow(2, 23))).toFixed(7);
+				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * (9500 / 65536) + 500).toFixed(2);
 				return 8;
 			}
 		},
@@ -469,7 +471,7 @@ if (input.fPort === 100) {
 		{
 			key: [0x26],
 			fn: function(arg) { 
-				decoded_data['ticks_per_ambient_temperature'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['ticks_per_MCU_temp'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
@@ -548,175 +550,31 @@ if (input.fPort === 100) {
 			}
 		},
 		{
-			key: [0x32],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('lpgnss_diagnostics_tx')) {
-					decoded_data['lpgnss_diagnostics_tx'] = {};
-				}
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['lpgnss_diagnostics_tx']['num_satellites_lpgnss'] = "Disable";
-						break;
-					case 1:
-						decoded_data['lpgnss_diagnostics_tx']['num_satellites_lpgnss'] = "Enable";
-						break;
-					default:
-						decoded_data['lpgnss_diagnostics_tx']['num_satellites_lpgnss'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['lpgnss_diagnostics_tx']['avg_satellite_snr_lpgnss'] = "Disable";
-						break;
-					case 1:
-						decoded_data['lpgnss_diagnostics_tx']['avg_satellite_snr_lpgnss'] = "Enable";
-						break;
-					default:
-						decoded_data['lpgnss_diagnostics_tx']['avg_satellite_snr_lpgnss'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 6, 6, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['lpgnss_diagnostics_tx']['min_max_satellite_snr_lpgnss'] = "Disable";
-						break;
-					case 1:
-						decoded_data['lpgnss_diagnostics_tx']['min_max_satellite_snr_lpgnss'] = "Enable";
-						break;
-					default:
-						decoded_data['lpgnss_diagnostics_tx']['min_max_satellite_snr_lpgnss'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x33],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('clock_sync')) {
-					decoded_data['clock_sync'] = {};
-				}
-				decoded_data['clock_sync']['interval'] = decode_field(arg, 1, 3, 0, "unsigned");
-				decoded_data['clock_sync']['invalid_delay_multiplier'] = decode_field(arg, 1, 6, 4, "unsigned");
-				decoded_data['clock_sync']['service'] = decode_field(arg, 1, 7, 7, "unsigned");
-				return 1;
-			}
-		},
-		{
-			key: [0x34],
-			fn: function(arg) { 
-				decoded_data['almanac_update_request_backoff'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x35],
-			fn: function(arg) { 
-				decoded_data['almanac_update_check_period'] = decode_field(arg, 1, 7, 0, "unsigned");
-				return 1;
-			}
-		},
-		{
 			key: [0x36],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('assist_coordinates_type')) {
-					decoded_data['assist_coordinates_type'] = {};
+				if(!decoded_data.hasOwnProperty('assist_coordinates')) {
+					decoded_data['assist_coordinates'] = {};
 				}
-				decoded_data['assist_coordinates_type']['latitude_gnss'] = decode_field(arg, 8, 63, 40, "unsigned");
+				decoded_data['assist_coordinates']['latitude_lpgnss'] = (decode_field(arg, 8, 63, 40, "unsigned") * 1.07E-05).toFixed(7);
+				decoded_data['assist_coordinates']['longitude_lpgnss'] = (decode_field(arg, 8, 39, 16, "unsigned") * 2.15E-05).toFixed(7);
+				var val = decode_field(arg, 8, 0, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['assist_coordinates']['enabled_lpgnss'] = "Disable";
+						break;
+					case 1:
+						decoded_data['assist_coordinates']['enabled_lpgnss'] = "Enable";
+						break;
+					default:
+						decoded_data['assist_coordinates']['enabled_lpgnss'] = "Invalid";
+				}}
 				return 8;
 			}
 		},
 		{
-			key: [0x37],
+			key: [0x3F],
 			fn: function(arg) { 
-				var val = decode_field(arg, 1, 7, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['gnss_constellation_option'] = "GPS";
-						break;
-					case 1:
-						decoded_data['gnss_constellation_option'] = "BeiDou";
-						break;
-					case 2:
-						decoded_data['gnss_constellation_option'] = "GPS and BeiDou";
-						break;
-					default:
-						decoded_data['gnss_constellation_option'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x3A],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('gnss_diagnostics_tx')) {
-					decoded_data['gnss_diagnostics_tx'] = {};
-				}
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['gnss_diagnostics_tx']['num_satellites_gnss'] = "Disable";
-						break;
-					case 1:
-						decoded_data['gnss_diagnostics_tx']['num_satellites_gnss'] = "Enable";
-						break;
-					default:
-						decoded_data['gnss_diagnostics_tx']['num_satellites_gnss'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['gnss_diagnostics_tx']['avg_satellite_snr_gnss'] = "Disable";
-						break;
-					case 1:
-						decoded_data['gnss_diagnostics_tx']['avg_satellite_snr_gnss'] = "Enable";
-						break;
-					default:
-						decoded_data['gnss_diagnostics_tx']['avg_satellite_snr_gnss'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 2, 2, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['gnss_diagnostics_tx']['fix_type_gnss'] = "Disable";
-						break;
-					case 1:
-						decoded_data['gnss_diagnostics_tx']['fix_type_gnss'] = "Enable";
-						break;
-					default:
-						decoded_data['gnss_diagnostics_tx']['fix_type_gnss'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 3, 3, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['gnss_diagnostics_tx']['time_to_fix_gnss'] = "Disable";
-						break;
-					case 1:
-						decoded_data['gnss_diagnostics_tx']['time_to_fix_gnss'] = "Enable";
-						break;
-					default:
-						decoded_data['gnss_diagnostics_tx']['time_to_fix_gnss'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 4, 4, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['gnss_diagnostics_tx']['log_num_gnss'] = "Disable";
-						break;
-					case 1:
-						decoded_data['gnss_diagnostics_tx']['log_num_gnss'] = "Enable";
-						break;
-					default:
-						decoded_data['gnss_diagnostics_tx']['log_num_gnss'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 5, 5, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['gnss_diagnostics_tx']['acc_and_num_fixes_report_gnss'] = "Disable";
-						break;
-					case 1:
-						decoded_data['gnss_diagnostics_tx']['acc_and_num_fixes_report_gnss'] = "Enable";
-						break;
-					default:
-						decoded_data['gnss_diagnostics_tx']['acc_and_num_fixes_report_gnss'] = "Invalid";
-				}}
+				decoded_data['gnss_receiver'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
@@ -729,13 +587,13 @@ if (input.fPort === 100) {
 				var val = decode_field(arg, 1, 7, 7, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['accelerometer_mode']['poweron'] = "Off";
+						decoded_data['accelerometer_mode']['power_on'] = "Off";
 						break;
 					case 1:
-						decoded_data['accelerometer_mode']['poweron'] = "On";
+						decoded_data['accelerometer_mode']['power_on'] = "On";
 						break;
 					default:
-						decoded_data['accelerometer_mode']['poweron'] = "Invalid";
+						decoded_data['accelerometer_mode']['power_on'] = "Invalid";
 				}}
 				var val = decode_field(arg, 1, 2, 2, "unsigned");
 				{switch (val){
@@ -828,58 +686,58 @@ if (input.fPort === 100) {
 		{
 			key: [0x42],
 			fn: function(arg) { 
-				decoded_data['acceleration_event_threshold_count'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['accl_trigger_threshold_count'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x43],
 			fn: function(arg) { 
-				decoded_data['acceleration_event_threshold_period'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['accl_trigger_thrsehold_period'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x44],
 			fn: function(arg) { 
-				decoded_data['acceleration_event_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['accl_trigger_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x45],
 			fn: function(arg) { 
-				decoded_data['acceleration_event_grace_period'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['accl_event_grace_period'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x46],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('acceleration_event_tx')) {
-					decoded_data['acceleration_event_tx'] = {};
+				if(!decoded_data.hasOwnProperty('accl_tx')) {
+					decoded_data['accl_tx'] = {};
 				}
 				var val = decode_field(arg, 1, 1, 1, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['acceleration_event_tx']['acceleration_assist'] = "Disable";
+						decoded_data['accl_tx']['accl_assist'] = "Disable";
 						break;
 					case 1:
-						decoded_data['acceleration_event_tx']['acceleration_assist'] = "Enable";
+						decoded_data['accl_tx']['accl_assist'] = "Enable";
 						break;
 					default:
-						decoded_data['acceleration_event_tx']['acceleration_assist'] = "Invalid";
+						decoded_data['accl_tx']['accl_assist'] = "Invalid";
 				}}
 				var val = decode_field(arg, 1, 0, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['acceleration_event_tx']['acceleration_alarms'] = "Disable";
+						decoded_data['accl_tx']['accl_alarms'] = "Disable";
 						break;
 					case 1:
-						decoded_data['acceleration_event_tx']['acceleration_alarms'] = "Enable";
+						decoded_data['accl_tx']['accl_alarms'] = "Enable";
 						break;
 					default:
-						decoded_data['acceleration_event_tx']['acceleration_alarms'] = "Invalid";
+						decoded_data['accl_tx']['accl_alarms'] = "Invalid";
 				}}
 				return 1;
 			}
@@ -1188,40 +1046,40 @@ if (input.fPort === 100) {
 				decoded_data['metadata']['app_ver_major'] = decode_field(arg, 7, 55, 48, "unsigned");
 				decoded_data['metadata']['app_ver_minor'] = decode_field(arg, 7, 47, 40, "unsigned");
 				decoded_data['metadata']['app_ver_revision'] = decode_field(arg, 7, 39, 32, "unsigned");
-				decoded_data['metadata']['loramac_ver_major'] = decode_field(arg, 7, 31, 24, "unsigned");
-				decoded_data['metadata']['loramac_ver_minor'] = decode_field(arg, 7, 23, 16, "unsigned");
-				decoded_data['metadata']['loramac_ver_revision'] = decode_field(arg, 7, 15, 8, "unsigned");
+				decoded_data['metadata']['modem_ver_major'] = decode_field(arg, 7, 31, 24, "unsigned");
+				decoded_data['metadata']['modem_ver_minor'] = decode_field(arg, 7, 23, 16, "unsigned");
+				decoded_data['metadata']['modem_ver_revision'] = decode_field(arg, 7, 15, 8, "unsigned");
 				var val = decode_field(arg, 7, 7, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['metadata']['loramac_region_id'] = "EU868";
+						decoded_data['metadata']['loramac_region'] = "EU868";
 						break;
 					case 1:
-						decoded_data['metadata']['loramac_region_id'] = "US915";
+						decoded_data['metadata']['loramac_region'] = "US915";
 						break;
 					case 2:
-						decoded_data['metadata']['loramac_region_id'] = "AS923";
+						decoded_data['metadata']['loramac_region'] = "AS923";
 						break;
 					case 3:
-						decoded_data['metadata']['loramac_region_id'] = "AU915";
+						decoded_data['metadata']['loramac_region'] = "AU915";
 						break;
 					case 4:
-						decoded_data['metadata']['loramac_region_id'] = "IN865";
+						decoded_data['metadata']['loramac_region'] = "IN865";
 						break;
 					case 5:
-						decoded_data['metadata']['loramac_region_id'] = "CN470";
+						decoded_data['metadata']['loramac_region'] = "CN470";
 						break;
 					case 6:
-						decoded_data['metadata']['loramac_region_id'] = "KR920";
+						decoded_data['metadata']['loramac_region'] = "KR920";
 						break;
 					case 7:
-						decoded_data['metadata']['loramac_region_id'] = "RU864";
+						decoded_data['metadata']['loramac_region'] = "RU864";
 						break;
 					case 8:
-						decoded_data['metadata']['loramac_region_id'] = "DN915";
+						decoded_data['metadata']['loramac_region'] = "DN915";
 						break;
 					default:
-						decoded_data['metadata']['loramac_region_id'] = "Invalid";
+						decoded_data['metadata']['loramac_region'] = "Invalid";
 				}}
 				return 7;
 			}
@@ -1401,7 +1259,7 @@ if (input.fPort === 100) {
         "data": decoded_data,
 		"errors": errors,
 		"warnings": [],
-		"tektelicMetadata": input.tektelicMetadata
     };
 
     return output;
+}
