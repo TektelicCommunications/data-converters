@@ -260,7 +260,7 @@ if (input.fPort === 11) {
 				var val = decode_field(arg, 9, 71, 64, "unsigned");
 				{switch (val){
 					case 255:
-						decoded_data['remaining_battery_capacity'] = "Invalid";
+						decoded_data['remaining_battery_capacity'] = "Unavailable";
 						break;
 					default:
 						decoded_data['remaining_battery_capacity'] = "Invalid";
@@ -346,7 +346,14 @@ if (input.fPort === 11) {
 					default:
 						decoded_data['position'] = "Invalid";
 				}}
-				decoded_data['af2'] = (decode_field(arg, 9, 7, 0, "unsigned") * 0.01).toFixed(2);
+				var val = decode_field(arg, 9, 7, 0, "unsigned");
+				{switch (val){
+					case 255:
+						decoded_data['af2'] = "Unavailable";
+						break;
+					default:
+						decoded_data['af2'] = "Invalid";
+				}}
 				return 9;
 			}
 		},
