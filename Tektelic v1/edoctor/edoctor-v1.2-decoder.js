@@ -263,7 +263,7 @@ if (input.fPort === 11) {
 						decoded_data['remaining_battery_capacity'] = "Unavailable";
 						break;
 					default:
-						decoded_data['remaining_battery_capacity'] = "Invalid";
+						decoded_data['remaining_battery_capacity'] = val;
 				}}
 				var val = decode_field(arg, 9, 63, 63, "unsigned");
 				{switch (val){
@@ -293,7 +293,7 @@ if (input.fPort === 11) {
 						decoded_data['st1'] = "Unavailable";
 						break;
 					default:
-						decoded_data['st1'] = "Invalid";
+						decoded_data['st1'] = (val*0.05).toFixed(2);
 				}}
 				var val = decode_field(arg, 9, 49, 40, "unsigned");
 				{switch (val){
@@ -301,7 +301,7 @@ if (input.fPort === 11) {
 						decoded_data['st2'] = "Unavailable";
 						break;
 					default:
-						decoded_data['st2'] = "Invalid";
+						decoded_data['st2'] = (val*0.05).toFixed(2);
 				}}
 				var val = decode_field(arg, 9, 39, 32, "unsigned");
 				{switch (val){
@@ -309,7 +309,7 @@ if (input.fPort === 11) {
 						decoded_data['pr'] = "Unavailable";
 						break;
 					default:
-						decoded_data['pr'] = "Invalid";
+						decoded_data['pr'] = val;
 				}}
 				var val = decode_field(arg, 9, 31, 24, "unsigned");
 				{switch (val){
@@ -317,7 +317,7 @@ if (input.fPort === 11) {
 						decoded_data['rr'] = "Unavailable";
 						break;
 					default:
-						decoded_data['rr'] = "Invalid";
+						decoded_data['rr'] = val;
 				}}
 				var val = decode_field(arg, 9, 23, 16, "unsigned");
 				{switch (val){
@@ -325,7 +325,7 @@ if (input.fPort === 11) {
 						decoded_data['ce'] = "Unavailable";
 						break;
 					default:
-						decoded_data['ce'] = "Invalid";
+						decoded_data['ce'] = (val*0.05).toFixed(2);
 				}}
 				var val = decode_field(arg, 9, 15, 15, "unsigned");
 				{switch (val){
@@ -344,7 +344,7 @@ if (input.fPort === 11) {
 						decoded_data['position'] = "Unavailable";
 						break;
 					default:
-						decoded_data['position'] = "Invalid";
+						decoded_data['position'] = val;
 				}}
 				var val = decode_field(arg, 9, 7, 0, "unsigned");
 				{switch (val){
@@ -352,7 +352,7 @@ if (input.fPort === 11) {
 						decoded_data['af2'] = "Unavailable";
 						break;
 					default:
-						decoded_data['af2'] = "Invalid";
+						decoded_data['af2'] = (val*0.01).toFixed(2);
 				}}
 				return 9;
 			}
