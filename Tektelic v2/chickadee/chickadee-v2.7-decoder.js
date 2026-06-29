@@ -22,10 +22,10 @@
 								invalid_registers.push("0x" + arg[i].toString(16));
 							}
 							arg = arg.slice(num_invalid_writes);
-							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from downlink (' + downlink_fcnt + ') for register(s): ' + invalid_registers);
 						}
 						else {
-							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+							responses.push('All write commands from downlink (' + downlink_fcnt + ') were successful');
 						}
 						invalid_registers = [];
 					}
@@ -174,9 +174,9 @@ if (input.fPort === 10) {
 				if(!decoded_data.hasOwnProperty('coordinates')) {
 					decoded_data['coordinates'] = {};
 				}
-				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * (90 / Math.pow(2, 23))).toFixed(7);
-				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * (180 / Math.pow(2, 23))).toFixed(7);
-				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * (9500 / 65536) + 500).toFixed(2);
+				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.0000107288360595703125).toFixed(7);
+				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.000021457672119140625).toFixed(7);
+				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.144958496 + -500).toFixed(2);
 				return 8;
 			}
 		},
@@ -553,8 +553,8 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('assist_coordinates')) {
 					decoded_data['assist_coordinates'] = {};
 				}
-				decoded_data['assist_coordinates']['latitude_lpgnss'] = (decode_field(arg, 8, 63, 40, "unsigned") * 1.07E-05).toFixed(7);
-				decoded_data['assist_coordinates']['longitude_lpgnss'] = (decode_field(arg, 8, 39, 16, "unsigned") * 2.15E-05).toFixed(7);
+				decoded_data['assist_coordinates']['latitude_lpgnss'] = (decode_field(arg, 8, 63, 40, "unsigned") * 0.0000107288360595703125).toFixed(7);
+				decoded_data['assist_coordinates']['longitude_lpgnss'] = (decode_field(arg, 8, 39, 16, "unsigned") * 0.000021457672119140625).toFixed(7);
 				var val = decode_field(arg, 8, 0, 0, "unsigned");
 				{switch (val){
 					case 0:
@@ -572,7 +572,17 @@ if (input.fPort === 100) {
 		{
 			key: [0x3F],
 			fn: function(arg) { 
-				decoded_data['gnss_receiver'] = decode_field(arg, 1, 7, 0, "unsigned");
+				var val = decode_field(arg, 1, 7, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['gnss_receiver'] = "LPGNSS";
+						break;
+					case 1:
+						decoded_data['gnss_receiver'] = "GNSS";
+						break;
+					default:
+						decoded_data['gnss_receiver'] = "Invalid";
+				}}
 				return 1;
 			}
 		},
