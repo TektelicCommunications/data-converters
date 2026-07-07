@@ -1,62 +1,60 @@
-var decoded_data = {};
-var decoder = [];
-var errors = [];
-var bytes = convertToUint8Array(bytes);
-decoded_data['raw'] = toHexString(bytes).toUpperCase();
-decoded_data['port'] = port;
-var input = {
-    "fPort": port,
-}
-if(input.fPort === 101){
-    decoder = [
-        {
-            key: [],
-            fn: function(arg) {
-                var size = arg.length;
-                var invalid_registers = [];
-                var responses = [];
-                while(arg.length > 0){
-                    var downlink_fcnt = arg[0];
-                    var num_invalid_writes = arg[1];
-                    arg = arg.slice(2);
-                    if(num_invalid_writes > 0) {
-                        for(var i = 0; i < num_invalid_writes; i++){
-                            invalid_registers.push("0x" + arg[i].toString(16));
-                        }
-                        arg = arg.slice(num_invalid_writes);
-                        responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
-                    }
-                    else {
-                        responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
-                    }
-                    invalid_registers = [];
-                }
-                decoded_data["response"] = responses;
-                return size;
-            }
-        }
-    ];
-}
+	var decoded_data = {};
+	var decoder = [];
+	var errors = [];
+	var bytes = convertToUint8Array(input.bytes);
+	decoded_data['raw'] = toHexString(bytes).toUpperCase();
+	decoded_data['fPort'] = input.fPort;
+
+	if(input.fPort === 101){
+		decoder = [
+			{
+				key: [],
+				fn: function(arg) { 
+					var size = arg.length;
+					var invalid_registers = [];
+					var responses = [];
+					while(arg.length > 0){
+						var downlink_fcnt = arg[0];
+						var num_invalid_writes = arg[1];
+						arg = arg.slice(2);
+						if(num_invalid_writes > 0) {
+							for(var i = 0; i < num_invalid_writes; i++){
+								invalid_registers.push("0x" + arg[i].toString(16));
+							}
+							arg = arg.slice(num_invalid_writes);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+						}
+						else {
+							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+						}
+						invalid_registers = [];
+					}
+					decoded_data["response"] = responses;
+					return size;
+				}
+			}
+		];
+	}
 
 if (input.fPort === 10) {
 	decoder = [
 		{
 			key: [0x00, 0xD3],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['battery_lifetime_pct'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
 			key: [0x00, 0xBD],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['battery_lifetime_dys'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x00, 0x85],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('utc')) {
 					decoded_data['utc'] = {};
 				}
@@ -71,33 +69,33 @@ if (input.fPort === 10) {
 		},
 		{
 			key: [0x00, 0x88],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('coordinates')) {
 					decoded_data['coordinates'] = {};
 				}
-				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.00001072883606).toFixed(7);
-				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.00002145767212).toFixed(7);
+				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
+				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
 				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.144958496 + -500).toFixed(2);
 				return 8;
 			}
 		},
 		{
 			key: [0x00, 0x92],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ground_speed'] = (decode_field(arg, 1, 7, 0, "unsigned") * 	0.27778 ).toFixed(3);
 				return 1;
 			}
 		},
 		{
 			key: [0x00, 0x00],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['gnss_fix'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
 			key: [0x00, 0x95],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('gnss_status')) {
 					decoded_data['gnss_status'] = {};
 				}
@@ -162,7 +160,7 @@ if (input.fPort === 10) {
 		},
 		{
 			key: [0x01, 0x95],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('ble_status')) {
 					decoded_data['ble_status'] = {};
 				}
@@ -238,41 +236,8 @@ if (input.fPort === 10) {
 			}
 		},
 		{
-			key: [0x00, 0x73],
-			fn: function(arg) {
-				decoded_data['barometric_pressure'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.1).toFixed(1);
-				return 2;
-			}
-		},
-		{
-			key: [0x00, 0x74],
-			fn: function(arg) {
-				decoded_data['cal_barometric_pressure'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.1).toFixed(1);
-				return 2;
-			}
-		},
-		{
-			key: [0x00, 0x71],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('acceleration_vector')) {
-					decoded_data['acceleration_vector'] = {};
-				}
-				decoded_data['acceleration_vector']['acceleration_x'] = (decode_field(arg, 6, 47, 32, "signed") * 0.001).toFixed(3);
-				decoded_data['acceleration_vector']['acceleration_y'] = (decode_field(arg, 6, 31, 16, "signed") * 0.001).toFixed(3);
-				decoded_data['acceleration_vector']['acceleration_z'] = (decode_field(arg, 6, 15, 0, "signed") * 0.001).toFixed(3);
-				return 6;
-			}
-		},
-		{
-			key: [0x00, 0x67],
-			fn: function(arg) {
-				decoded_data['temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
-				return 2;
-			}
-		},
-		{
 			key: [0x02, 0x95],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('safety_status')) {
 					decoded_data['safety_status'] = {};
 				}
@@ -334,103 +299,213 @@ if (input.fPort === 10) {
 				return 1;
 			}
 		},
+		{
+			key: [0x00, 0x71],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('acceleration_vector')) {
+					decoded_data['acceleration_vector'] = {};
+				}
+				decoded_data['acceleration_vector']['acceleration_x'] = (decode_field(arg, 6, 47, 32, "signed") * 0.001).toFixed(3);
+				decoded_data['acceleration_vector']['acceleration_y'] = (decode_field(arg, 6, 31, 16, "signed") * 0.001).toFixed(3);
+				decoded_data['acceleration_vector']['acceleration_z'] = (decode_field(arg, 6, 15, 0, "signed") * 0.001).toFixed(3);
+				return 6;
+			}
+		},
+		{
+			key: [0x00, 0x73],
+			fn: function(arg) { 
+				decoded_data['barometric_pressure'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.1).toFixed(1);
+				return 2;
+			}
+		},
+		{
+			key: [0x00, 0x74],
+			fn: function(arg) { 
+				decoded_data['cal_barometric_pressure'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.1).toFixed(1);
+				return 2;
+			}
+		},
+		{
+			key: [0x00, 0x67],
+			fn: function(arg) { 
+				decoded_data['temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
+				return 2;
+			}
+		},
+	];
+}
+if (input.fPort === 16) {
+	decoder = [
+		{
+			key: [0x0D, 0x3C],
+			fn: function(arg) { 
+				decoded_data['num_satellites'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x0D, 0x64],
+			fn: function(arg) { 
+				decoded_data['avg_satellite_snr'] = decode_field(arg, 2, 15, 0, "unsigned") * 0.1;
+				return 2;
+			}
+		},
+		{
+			key: [0x0D, 0x0F],
+			fn: function(arg) { 
+				decoded_data['log_num'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+			}
+		},
+		{
+			key: [0x0D, 0x95],
+			fn: function(arg) { 
+				var val = decode_field(arg, 1, 1, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['fix_type'] = "No fix available";
+						break;
+					case 2:
+						decoded_data['fix_type'] = "2D fix";
+						break;
+					case 3:
+						decoded_data['fix_type'] = "3D Fix";
+						break;
+					default:
+						decoded_data['fix_type'] = "Invalid";
+				}}
+				return 1;
+			}
+		},
+		{
+			key: [0x0D, 0x96],
+			fn: function(arg) { 
+				decoded_data['time_to_fix'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+			}
+		},
+		{
+			key: [0x0D, 0x97],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('fix_accuracy')) {
+					decoded_data['fix_accuracy'] = {};
+				}
+				decoded_data['fix_accuracy']['gnss_vertical_accuracy'] = (decode_field(arg, 4, 31, 16, "unsigned")).toFixed(2);
+				decoded_data['fix_accuracy']['gnss_horizontal_accuracy'] = (decode_field(arg, 4, 15, 0, "unsigned")).toFixed(2);
+				return 4;
+			}
+		},
+		{
+			key: [0x0D, 0x98],
+			fn: function(arg) { 
+				decoded_data['ground_speed_accuracy'] = (decode_field(arg, 4, 31, 0, "unsigned") * 0.001).toFixed(3);
+				return 4;
+			}
+		},
+		{
+			key: [0x0D, 0x99],
+			fn: function(arg) { 
+				decoded_data['num_of_fixes'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
+			}
+		},
 	];
 }
 if (input.fPort === 25) {
 	decoder = [
 		{
 			key: [0x0A],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('ble_1')) {
-					decoded_data['ble_1'] = {};
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('basic_report')) {
+					decoded_data['basic_report'] = {};
 				}
 					var data = [];
 					var loop = arg.length / 7;
 					for (var i = 0; i < loop; i++) {
 						var group = {};
-						group['id_01'] = decode_field(arg, 7, 55, 8, "hexstring");
-						group['rssi_01'] = decode_field(arg, 7, 7, 0, "signed");
+						group['id_0'] = decode_field(arg, 7, 55, 8, "hexstring");
+						group['rssi_0'] = decode_field(arg, 7, 7, 0, "signed");
 						data.push(group);
 						arg = arg.slice(7);
 					}
-					decoded_data['ble_1'] = data;
+					decoded_data['basic_report'] = data;
 					return loop*7;
 			}
 		},
 		{
 			key: [0xB0],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('ble_2')) {
-					decoded_data['ble_2'] = {};
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('filter_report_0')) {
+					decoded_data['filter_report_0'] = {};
 				}
 					var data = [];
-					var loop = arg.length / 7;
+					var loop = arg.length / 4;
 					for (var i = 0; i < loop; i++) {
 						var group = {};
-						group['id_02'] = decode_field(arg, 7, 55, 8, "hexstring");
-						group['rssi_02'] = decode_field(arg, 7, 7, 0, "signed");
+						group['id_1'] = decode_field(arg, 4, 31, 8, "hexstring");
+						group['rssi_1'] = decode_field(arg, 4, 7, 0, "signed");
 						data.push(group);
-						arg = arg.slice(7);
+						arg = arg.slice(4);
 					}
-					decoded_data['ble_2'] = data;
-					return loop*7;
+					decoded_data['filter_report_0'] = data;
+					return loop*4;
 			}
 		},
 		{
 			key: [0xB1],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('ble_3')) {
-					decoded_data['ble_3'] = {};
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('filter_report_1')) {
+					decoded_data['filter_report_1'] = {};
 				}
 					var data = [];
-					var loop = arg.length / 7;
+					var loop = arg.length / 4;
 					for (var i = 0; i < loop; i++) {
 						var group = {};
-						group['id_03'] = decode_field(arg, 7, 55, 8, "hexstring");
-						group['rssi_03'] = decode_field(arg, 7, 7, 0, "signed");
+						group['id_2'] = decode_field(arg, 4, 31, 8, "hexstring");
+						group['rssi_2'] = decode_field(arg, 4, 7, 0, "signed");
 						data.push(group);
-						arg = arg.slice(7);
+						arg = arg.slice(4);
 					}
-					decoded_data['ble_3'] = data;
-					return loop*7;
+					decoded_data['filter_report_1'] = data;
+					return loop*4;
 			}
 		},
 		{
 			key: [0xB2],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('ble_4')) {
-					decoded_data['ble_4'] = {};
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('filter_report_2')) {
+					decoded_data['filter_report_2'] = {};
 				}
 					var data = [];
-					var loop = arg.length / 7;
+					var loop = arg.length / 4;
 					for (var i = 0; i < loop; i++) {
 						var group = {};
-						group['id_04'] = decode_field(arg, 7, 55, 8, "hexstring");
-						group['rssi_04'] = decode_field(arg, 7, 7, 0, "signed");
+						group['id_3'] = decode_field(arg, 4, 31, 8, "hexstring");
+						group['rssi_3'] = decode_field(arg, 4, 7, 0, "signed");
 						data.push(group);
-						arg = arg.slice(7);
+						arg = arg.slice(4);
 					}
-					decoded_data['ble_4'] = data;
-					return loop*7;
+					decoded_data['filter_report_2'] = data;
+					return loop*4;
 			}
 		},
 		{
 			key: [0xB3],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('ble_5')) {
-					decoded_data['ble_5'] = {};
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('filter_report_3')) {
+					decoded_data['filter_report_3'] = {};
 				}
 					var data = [];
-					var loop = arg.length / 7;
+					var loop = arg.length / 4;
 					for (var i = 0; i < loop; i++) {
 						var group = {};
-						group['id_05'] = decode_field(arg, 7, 55, 8, "hexstring");
-						group['rssi_05'] = decode_field(arg, 7, 7, 0, "signed");
+						group['id_4'] = decode_field(arg, 4, 31, 8, "hexstring");
+						group['rssi_4'] = decode_field(arg, 4, 7, 0, "signed");
 						data.push(group);
-						arg = arg.slice(7);
+						arg = arg.slice(4);
 					}
-					decoded_data['ble_5'] = data;
-					return loop*7;
+					decoded_data['filter_report_3'] = data;
+					return loop*4;
 			}
 		},
 	];
@@ -439,7 +514,7 @@ if (input.fPort === 100) {
 	decoder = [
 		{
 			key: [0x10],
-			fn: function(arg) {
+			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 15, "unsigned");
 				{switch (val){
 					case 0:
@@ -456,7 +531,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x11],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('loramac_opts')) {
 					decoded_data['loramac_opts'] = {};
 				}
@@ -509,7 +584,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x12],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('loramac_dr_tx')) {
 					decoded_data['loramac_dr_tx'] = {};
 				}
@@ -520,7 +595,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x13],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('loramac_rx2')) {
 					decoded_data['loramac_rx2'] = {};
 				}
@@ -531,63 +606,63 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x20],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['seconds_per_core_tick'] = decode_field(arg, 4, 31, 0, "unsigned");
 				return 4;
 			}
 		},
 		{
 			key: [0x21],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ticks_battery'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x22],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ticks_normal_state'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x23],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ticks_emergency_state'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x24],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ticks_accelerometer'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x25],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ticks_temperature'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x26],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ticks_safety_status_normal'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x27],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ticks_pressure'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x28],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('eb_active_buzz_config')) {
 					decoded_data['eb_active_buzz_config'] = {};
 				}
@@ -599,7 +674,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x29],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('eb_inactive_buzz_config')) {
 					decoded_data['eb_inactive_buzz_config'] = {};
 				}
@@ -611,18 +686,34 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x2C],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['sh_debounce_interval'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
 			key: [0x2D],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('sh_buzz_config')) {
 					decoded_data['sh_buzz_config'] = {};
 				}
-				decoded_data['sh_buzz_config']['sh_buzz_when_to'] = decode_field(arg, 5, 33, 32, "hexstring");
+				var val = decode_field(arg, 5, 33, 32, "hexstring");
+				{switch (val){
+					case 0:
+						decoded_data['sh_buzz_config']['sh_buzz_trigger_type'] = "Always";
+						break;
+					case 1:
+						decoded_data['sh_buzz_config']['sh_buzz_trigger_type'] = "IN GNSS DZ ONLY";
+						break;
+					case 2:
+						decoded_data['sh_buzz_config']['sh_buzz_trigger_type'] = "IN BLE DZ ONLY";
+						break;
+					case 3:
+						decoded_data['sh_buzz_config']['sh_buzz_trigger_type'] = "IN ANY DZ";
+						break;
+					default:
+						decoded_data['sh_buzz_config']['sh_buzz_trigger_type'] = "Invalid";
+				}}
 				decoded_data['sh_buzz_config']['sh_buzz_on_time'] = (decode_field(arg, 5, 31, 24, "unsigned") * 0.1).toFixed(1);
 				decoded_data['sh_buzz_config']['sh_buzz_off_time'] = (decode_field(arg, 5, 23, 16, "unsigned") * 0.1).toFixed(1);
 				decoded_data['sh_buzz_config']['sh_buzz_num_on_offs'] = decode_field(arg, 5, 15, 8, "unsigned");
@@ -632,7 +723,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x30],
-			fn: function(arg) {
+			fn: function(arg) { 
 				var val = decode_field(arg, 1, 7, 7, "unsigned");
 				{switch (val){
 					case 0:
@@ -649,7 +740,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x31],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('gnss_report_options')) {
 					decoded_data['gnss_report_options'] = {};
 				}
@@ -691,55 +782,55 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x32],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('gnss_dz0')) {
 					decoded_data['gnss_dz0'] = {};
 				}
-				decoded_data['gnss_dz0']['gnss_dz0_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.00001072883606).toFixed(7);
-				decoded_data['gnss_dz0']['gnss_dz0_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.00002145767212).toFixed(7);
+				decoded_data['gnss_dz0']['gnss_dz0_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
+				decoded_data['gnss_dz0']['gnss_dz0_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
 				decoded_data['gnss_dz0']['gnss_dz0_radius'] = (decode_field(arg, 8, 15, 0, "signed") * 10).toFixed(1);
 				return 8;
 			}
 		},
 		{
 			key: [0x33],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('gnss_dz1')) {
 					decoded_data['gnss_dz1'] = {};
 				}
-				decoded_data['gnss_dz1']['gnss_dz1_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.00001072883606).toFixed(7);
-				decoded_data['gnss_dz1']['gnss_dz1_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.00002145767212).toFixed(7);
+				decoded_data['gnss_dz1']['gnss_dz1_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
+				decoded_data['gnss_dz1']['gnss_dz1_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
 				decoded_data['gnss_dz1']['gnss_dz1_radius'] = (decode_field(arg, 8, 15, 0, "signed") * 10).toFixed(1);
 				return 8;
 			}
 		},
 		{
 			key: [0x34],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('gnss_dz2')) {
 					decoded_data['gnss_dz2'] = {};
 				}
-				decoded_data['gnss_dz2']['gnss_dz2_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.00001072883606).toFixed(7);
-				decoded_data['gnss_dz2']['gnss_dz2_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.00002145767212).toFixed(7);
+				decoded_data['gnss_dz2']['gnss_dz2_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
+				decoded_data['gnss_dz2']['gnss_dz2_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
 				decoded_data['gnss_dz2']['gnss_dz2_radius'] = (decode_field(arg, 8, 15, 0, "signed") * 10).toFixed(1);
 				return 8;
 			}
 		},
 		{
 			key: [0x35],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('gnss_dz3')) {
 					decoded_data['gnss_dz3'] = {};
 				}
-				decoded_data['gnss_dz3']['gnss_dz3_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.00001072883606).toFixed(7);
-				decoded_data['gnss_dz3']['gnss_dz3_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.00002145767212).toFixed(7);
+				decoded_data['gnss_dz3']['gnss_dz3_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
+				decoded_data['gnss_dz3']['gnss_dz3_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
 				decoded_data['gnss_dz3']['gnss_dz3_radius'] = (decode_field(arg, 8, 15, 0, "signed") * 10).toFixed(1);
 				return 8;
 			}
 		},
 		{
 			key: [0x36],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('gnss_diagnostics_tx')) {
 					decoded_data['gnss_diagnostics_tx'] = {};
 				}
@@ -813,59 +904,28 @@ if (input.fPort === 100) {
 			}
 		},
 		{
-			key: [0x38],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('emergency_state_trigger')) {
-					decoded_data['emergency_state_trigger'] = {};
-				}
-				var val = decode_field(arg, 1, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['emergency_state_trigger']['emergency_trigger_by_ble_dz'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['emergency_state_trigger']['emergency_trigger_by_ble_dz'] = "Enabled";
-						break;
-					default:
-						decoded_data['emergency_state_trigger']['emergency_trigger_by_ble_dz'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['emergency_state_trigger']['emergency_trigger_by_gnss_dz'] = "Disabled";
-						break;
-					case 1:
-						decoded_data['emergency_state_trigger']['emergency_trigger_by_gnss_dz'] = "Enabled";
-						break;
-					default:
-						decoded_data['emergency_state_trigger']['emergency_trigger_by_gnss_dz'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
 			key: [0x39],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('emergency_state_led_config')) {
 					decoded_data['emergency_state_led_config'] = {};
 				}
-				decoded_data['emergency_state_led_config']['emergency_led_on_time'] = (decode_field(arg, 4, 31, 24, "unsigned") * 0.01).toFixed(2);
-				decoded_data['emergency_state_led_config']['emergency_led_off_time'] = (decode_field(arg, 4, 23, 16, "unsigned") * 0.01).toFixed(2);
-				decoded_data['emergency_state_led_config']['emergency_led_num_on_offs'] = decode_field(arg, 4, 15, 8, "unsigned");
-				decoded_data['emergency_state_led_config']['emergency_led_period'] = (decode_field(arg, 4, 7, 0, "unsigned") * 0.1).toFixed(1);
+				decoded_data['emergency_state_led_config']['emerg_led_active_on_time'] = (decode_field(arg, 4, 31, 24, "unsigned") * 0.01).toFixed(2);
+				decoded_data['emergency_state_led_config']['emerg_led_active_off_time'] = (decode_field(arg, 4, 23, 16, "unsigned") * 0.01).toFixed(2);
+				decoded_data['emergency_state_led_config']['emerg_led_active_periodicity'] = decode_field(arg, 4, 15, 8, "unsigned");
+				decoded_data['emergency_state_led_config']['emerg_led_active_period'] = (decode_field(arg, 4, 7, 0, "unsigned") * 0.1).toFixed(1);
 				return 4;
 			}
 		},
 		{
 			key: [0x3B],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['seconds_pressure_sample'] = decode_field(arg, 1, 5, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
 			key: [0x3C],
-			fn: function(arg) {
+			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 0, "unsigned");
 				{switch (val){
 					case 0:
@@ -882,81 +942,32 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x3D],
-			fn: function(arg) {
-				decoded_data['pressure_threshold_max'] = decode_field(arg, 4, 31, 16, "unsigned");
-				decoded_data['pressure_threshold_min'] = decode_field(arg, 4, 15, 0, "unsigned");
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('pressure_threshold')) {
+					decoded_data['pressure_threshold'] = {};
+				}
+				decoded_data['pressure_threshold']['pressure_threshold_max'] = decode_field(arg, 4, 31, 16, "unsigned");
+				decoded_data['pressure_threshold']['pressure_threshold_min'] = decode_field(arg, 4, 15, 0, "unsigned");
 				return 4;
 			}
 		},
 		{
-			key: [0x41],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('accelerometer_sensitivity')) {
-					decoded_data['accelerometer_sensitivity'] = {};
-				}
-				var val = decode_field(arg, 1, 5, 4, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "+/-2g";
-						break;
-					case 1:
-						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "+/-4 g";
-						break;
-					case 2:
-						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "+/-8 g";
-						break;
-					case 3:
-						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "+/-6 g";
-						break;
-					default:
-						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 2, 0, "unsigned");
-				{switch (val){
-					case 1:
-						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "1 Hz";
-						break;
-					case 2:
-						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "10 Hz";
-						break;
-					case 3:
-						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "25 Hz";
-						break;
-					case 4:
-						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "50 Hz";
-						break;
-					case 5:
-						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "100 Hz";
-						break;
-					case 6:
-						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "200 Hz";
-						break;
-					case 7:
-						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "400 Hz";
-						break;
-					default:
-						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
 			key: [0x42],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['sleep_acceleration_threshold'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
 				return 2;
 			}
 		},
 		{
 			key: [0x43],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['timeout_to_sleep'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
 			key: [0x48],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('free_fall')) {
 					decoded_data['free_fall'] = {};
 				}
@@ -967,7 +978,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x49],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('impact')) {
 					decoded_data['impact'] = {};
 				}
@@ -978,7 +989,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x4A],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('torpidity')) {
 					decoded_data['torpidity'] = {};
 				}
@@ -989,7 +1000,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x50],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('ble_mode')) {
 					decoded_data['ble_mode'] = {};
 				}
@@ -1021,28 +1032,28 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x51],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ble_scan_duration_periodic'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
 			key: [0x52],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ble_scan_interval'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x53],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['ble_scan_window'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x54],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('ble_range0')) {
 					decoded_data['ble_range0'] = {};
 				}
@@ -1054,7 +1065,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x55],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('ble_range1')) {
 					decoded_data['ble_range1'] = {};
 				}
@@ -1066,7 +1077,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x56],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('ble_range2')) {
 					decoded_data['ble_range2'] = {};
 				}
@@ -1078,7 +1089,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x57],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('ble_range3')) {
 					decoded_data['ble_range3'] = {};
 				}
@@ -1089,52 +1100,50 @@ if (input.fPort === 100) {
 			}
 		},
 		{
-			key: [0x58],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('ble_dz0')) {
-					decoded_data['ble_dz0'] = {};
-				}
-				decoded_data['ble_dz0']['ble_dz0_bd_addr'] = decode_field(arg, 7, 55, 8, "hexstring");
-				decoded_data['ble_dz0']['ble_dz0_rssi'] = decode_field(arg, 7, 7, 0, "signed");
-				return 7;
+			key: [0x60],
+			fn: function(arg) { 
+				decoded_data['temperature_sample_period_idle'] = decode_field(arg, 4, 31, 0, "unsigned");
+				return 4;
 			}
 		},
 		{
-			key: [0x59],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('ble_dz1')) {
-					decoded_data['ble_dz1'] = {};
-				}
-				decoded_data['ble_dz1']['ble_dz1_bd_addr'] = decode_field(arg, 7, 55, 8, "hexstring");
-				decoded_data['ble_dz1']['ble_dz1_rssi'] = decode_field(arg, 7, 7, 0, "signed");
-				return 7;
+			key: [0x61],
+			fn: function(arg) { 
+				decoded_data['temperature_sample_period_active'] = decode_field(arg, 4, 31, 0, "unsigned");
+				return 4;
 			}
 		},
 		{
-			key: [0x5A],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('ble_dz2')) {
-					decoded_data['ble_dz2'] = {};
+			key: [0x62],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('temperature_thresholds')) {
+					decoded_data['temperature_thresholds'] = {};
 				}
-				decoded_data['ble_dz2']['ble_dz2_bd_addr'] = decode_field(arg, 7, 55, 8, "hexstring");
-				decoded_data['ble_dz2']['ble_dz2_rssi'] = decode_field(arg, 7, 7, 0, "signed");
-				return 7;
+				decoded_data['temperature_thresholds']['temperature_threshold_high'] = decode_field(arg, 2, 15, 8, "signed");
+				decoded_data['temperature_thresholds']['temperature_threshold_low'] = decode_field(arg, 2, 7, 0, "signed");
+				return 2;
 			}
 		},
 		{
-			key: [0x5B],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('ble_dz3')) {
-					decoded_data['ble_dz3'] = {};
-				}
-				decoded_data['ble_dz3']['ble_dz3_bd_addr'] = decode_field(arg, 7, 55, 8, "hexstring");
-				decoded_data['ble_dz3']['ble_dz3_rssi'] = decode_field(arg, 7, 7, 0, "signed");
-				return 7;
+			key: [0x63],
+			fn: function(arg) { 
+				var val = decode_field(arg, 1, 0, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['temperature_threshold_status'] = "Disabled";
+						break;
+					case 1:
+						decoded_data['temperature_threshold_status'] = "Enabled";
+						break;
+					default:
+						decoded_data['temperature_threshold_status'] = "Invalid";
+				}}
+				return 1;
 			}
 		},
 		{
 			key: [0x68],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('battery_report_options')) {
 					decoded_data['battery_report_options'] = {};
 				}
@@ -1165,7 +1174,7 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x69],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('low_battery_threshold')) {
 					decoded_data['low_battery_threshold'] = {};
 				}
@@ -1186,41 +1195,27 @@ if (input.fPort === 100) {
 		},
 		{
 			key: [0x6A],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('low_battery_led_config')) {
 					decoded_data['low_battery_led_config'] = {};
 				}
-				decoded_data['low_battery_led_config']['low_battery_led_on_time'] = (decode_field(arg, 4, 31, 24, "unsigned") * 0.01).toFixed(2);
-				decoded_data['low_battery_led_config']['low_battery_led_off_time'] = (decode_field(arg, 4, 23, 16, "unsigned") * 0.01).toFixed(2);
-				decoded_data['low_battery_led_config']['low_battery_led_num_on_offs'] = decode_field(arg, 4, 15, 8, "unsigned");
-				decoded_data['low_battery_led_config']['low_battery_led_period'] = decode_field(arg, 4, 7, 0, "unsigned");
+				decoded_data['low_battery_led_config']['low_battery_led_active_on_time'] = (decode_field(arg, 4, 31, 24, "unsigned") * 0.01).toFixed(2);
+				decoded_data['low_battery_led_config']['low_battery_led_active_off_time'] = (decode_field(arg, 4, 23, 16, "unsigned") * 0.01).toFixed(2);
+				decoded_data['low_battery_led_config']['low_battery_led_active_periodicity'] = decode_field(arg, 4, 15, 8, "unsigned");
+				decoded_data['low_battery_led_config']['low_battery_led_active_period'] = decode_field(arg, 4, 7, 0, "unsigned");
 				return 4;
 			}
 		},
 		{
-			key: [0x6B],
-			fn: function(arg) {
-				decoded_data['avg_energy_trend_window'] = decode_field(arg, 1, 7, 0, "unsigned");
-				return 1;
-			}
-		},
-		{
 			key: [0x6C],
-			fn: function(arg) {
+			fn: function(arg) { 
 				decoded_data['buzzer_disable_timeout'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
-			key: [0x6F],
-			fn: function(arg) {
-				decoded_data['resp_format'] = decode_field(arg, 1, 7, 0, "unsigned");
-				return 1;
-			}
-		},
-		{
 			key: [0x71],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('metadata')) {
 					decoded_data['metadata'] = {};
 				}
@@ -1236,7 +1231,7 @@ if (input.fPort === 100) {
 						decoded_data['metadata']['lorawan_region_id'] = "EU868";
 						break;
 					case 1:
-						decoded_data['metadata']['lorawan_region_id'] = "US916";
+						decoded_data['metadata']['lorawan_region_id'] = "US915";
 						break;
 					case 2:
 						decoded_data['metadata']['lorawan_region_id'] = "AS923";
@@ -1264,88 +1259,11 @@ if (input.fPort === 100) {
 		},
 	];
 }
-if (input.fPort === 16) {
-	decoder = [
-		{
-			key: [0x0D, 0x3C],
-			fn: function(arg) {
-				decoded_data['num_satellites'] = decode_field(arg, 1, 7, 0, "unsigned");
-				return 1;
-			}
-		},
-		{
-			key: [0x0D, 0x64],
-			fn: function(arg) {
-				decoded_data['avg_satellite_snr'] = decode_field(arg, 2, 15, 0, "unsigned") * 0.1;
-				return 2;
-			}
-		},
-		{
-			key: [0x0D, 0x95],
-			fn: function(arg) {
-				var val = decode_field(arg, 1, 1, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['fix_type'] = "No fix available";
-						break;
-					case 2:
-						decoded_data['fix_type'] = "2D fix";
-						break;
-					case 3:
-						decoded_data['fix_type'] = "3D Fix";
-						break;
-					default:
-						decoded_data['fix_type'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x0D, 0x96],
-			fn: function(arg) {
-				decoded_data['time_to_fix'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x0D, 0x97],
-			fn: function(arg) {
-				if(!decoded_data.hasOwnProperty('fix_accuracy')) {
-					decoded_data['fix_accuracy'] = {};
-				}
-				decoded_data['fix_accuracy']['gnss_vertical_accuracy'] = (decode_field(arg, 4, 31, 16, "unsigned")).toFixed(2);
-				decoded_data['fix_accuracy']['gnss_horizontal_accuracy'] = (decode_field(arg, 4, 15, 0, "unsigned")).toFixed(2);
-				return 4;
-			}
-		},
-		{
-			key: [0x0D, 0x98],
-			fn: function(arg) {
-				decoded_data['ground_speed_accuracy'] = (decode_field(arg, 4, 31, 0, "unsigned") * 0.001).toFixed(3);
-				return 4;
-			}
-		},
-		{
-			key: [0x0D, 0x99],
-			fn: function(arg) {
-				decoded_data['num_of_fixes'] = decode_field(arg, 1, 7, 0, "unsigned");
-				return 1;
-			}
-		},
-		{
-			key: [0x0D, 0x0F],
-			fn: function(arg) {
-				decoded_data['log_num'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-	];
-}
 if (input.fPort === 15) {
 	decoder = [
 		{
 			key: [0x0A],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('log_request_utc_type_a')) {
 					decoded_data['log_request_utc_type_a'] = {};
 				}
@@ -1361,7 +1279,7 @@ if (input.fPort === 15) {
 		},
 		{
 			key: [0x0B],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('log_request_utc_type_b')) {
 					decoded_data['log_request_utc_type_b'] = {};
 				}
@@ -1371,7 +1289,7 @@ if (input.fPort === 15) {
 		},
 		{
 			key: [0x01],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('log_utc')) {
 					decoded_data['log_utc'] = {};
 				}
@@ -1387,24 +1305,23 @@ if (input.fPort === 15) {
 		},
 		{
 			key: [0x02],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('log_coordinates')) {
 					decoded_data['log_coordinates'] = {};
 				}
 				decoded_data['log_coordinates']['fragment_number_2'] = decode_field(arg, 9, 71, 64, "unsigned");
-				decoded_data['log_coordinates']['latitude_2'] = (decode_field(arg, 9, 63, 40, "signed") * 0.00001072883606).toFixed(7);
-				decoded_data['log_coordinates']['longitude_2'] = (decode_field(arg, 9, 39, 16, "signed") * 0.00002145767212).toFixed(7);
+				decoded_data['log_coordinates']['latitude_2'] = (decode_field(arg, 9, 63, 40, "signed") * 1.07E-05).toFixed(7);
+				decoded_data['log_coordinates']['longitude_2'] = (decode_field(arg, 9, 39, 16, "signed") * 2.15E-05).toFixed(7);
 				decoded_data['log_coordinates']['altitude_2'] = (decode_field(arg, 9, 15, 0, "signed") * 0.144958496 + -500).toFixed(3);
 				return 9;
 			}
 		},
 		{
 			key: [0x03],
-			fn: function(arg) {
+			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('log_all')) {
 					decoded_data['log_all'] = {};
 				}
-					arg = arg.slice(1)
 					var data = [];
 					var loop = arg.length / 12;
 					for (var i = 0; i < loop; i++) {
@@ -1415,9 +1332,9 @@ if (input.fPort === 15) {
 						group['hour_3'] = decode_field(arg, 12, 80, 76, "unsigned");
 						group['minute_3'] = decode_field(arg, 12, 75, 70, "unsigned");
 						group['second_3'] = decode_field(arg, 12, 69, 64, "unsigned");
-						group['latitude_3'] = (decode_field(arg, 12, 63, 40, "signed") * 0.00001072883606).toFixed(7);
-						group['longitude_3'] = (decode_field(arg, 12, 39, 16, "signed") * 0.00002145767212).toFixed(7);
-						group['altitude_3'] = (decode_field(arg, 12, 15, 0, "signed") * 0.144958496 + -500).toFixed(3);
+						group['latitude_3'] = decode_field(arg, 12, 63, 40, "signed");
+						group['longitude_3'] = decode_field(arg, 12, 39, 16, "signed");
+						group['altitude_3'] = decode_field(arg, 12, 15, 0, "signed");
 						data.push(group);
 						arg = arg.slice(12);
 					}
@@ -1575,13 +1492,20 @@ if (input.fPort === 15) {
 		return arr.join(' ');
 	}
 
-	// Converts array of bytes to 8 bit array
-	function convertToUint8Array(byteArray) {
+    // Converts array of bytes to 8 bit array
+    function convertToUint8Array(byteArray) {
 		var arr = [];
 		for (var i = 0; i < byteArray.length; i++) {
 			arr.push(to_uint(byteArray[i]) & 0xff);
 		}
 		return arr;
 	}
-	decoded_data["errors"] = errors;
-	return decoded_data;
+
+    var output = {
+        "data": decoded_data,
+		"errors": errors,
+		"warnings": [],
+		"tektelicMetadata": input.tektelicMetadata
+    };
+
+    return output;

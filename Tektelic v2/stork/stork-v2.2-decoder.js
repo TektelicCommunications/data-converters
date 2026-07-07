@@ -22,10 +22,10 @@
 								invalid_registers.push("0x" + arg[i].toString(16));
 							}
 							arg = arg.slice(num_invalid_writes);
-							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from downlink (' + downlink_fcnt + ') for register(s): ' + invalid_registers);
 						}
 						else {
-							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+							responses.push('All write commands from downlink (' + downlink_fcnt + ') were successful');
 						}
 						invalid_registers = [];
 					}
@@ -91,41 +91,59 @@ if (input.fPort === 10) {
 				return 1;
 			}
 		},
-	];
-}
-if (input.fPort === 100) {
-	decoder = [
 		{
-			key: [0x46],
+			key: [0x00, 0x00],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('acceleration_event_tx')) {
-					decoded_data['acceleration_event_tx'] = {};
-				}
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
+				var val = decode_field(arg, 1, 7, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['acceleration_event_tx']['acceleration_alarm'] = "Disable";
+						decoded_data['acceleration_alarm'] = "No motion";
 						break;
-					case 1:
-						decoded_data['acceleration_event_tx']['acceleration_alarm'] = "Enable";
-						break;
-					default:
-						decoded_data['acceleration_event_tx']['acceleration_alarm'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 1, 1, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['acceleration_event_tx']['acceleration_assist'] = "Disable";
-						break;
-					case 1:
-						decoded_data['acceleration_event_tx']['acceleration_assist'] = "Enable";
+					case 255:
+						decoded_data['acceleration_alarm'] = "Motion detected";
 						break;
 					default:
-						decoded_data['acceleration_event_tx']['acceleration_assist'] = "Invalid";
+						decoded_data['acceleration_alarm'] = "Invalid";
 				}}
 				return 1;
 			}
 		},
+	];
+}
+if (input.fPort === 16) {
+	decoder = [
+		{
+			key: [0x0D, 0x3C],
+			fn: function(arg) { 
+				decoded_data['num_satellites'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x0D, 0x64],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('min_max_satellite_snr')) {
+					decoded_data['min_max_satellite_snr'] = {};
+				}
+				decoded_data['min_max_satellite_snr']['avg_satellite_snr'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
+				return 2;
+			}
+		},
+		{
+			key: [0x0D, 0x63],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('min_max_satellite_snr')) {
+					decoded_data['min_max_satellite_snr'] = {};
+				}
+				decoded_data['min_max_satellite_snr']['min_satellite_snr'] = (decode_field(arg, 4, 15, 0, "signed") * 0.1).toFixed(1);
+				decoded_data['min_max_satellite_snr']['maxi_satellite_snr'] = (decode_field(arg, 4, 31, 16, "signed") * 0.1).toFixed(1);
+				return 4;
+			}
+		},
+	];
+}
+if (input.fPort === 100) {
+	decoder = [
 		{
 			key: [0x0A],
 			fn: function(arg) { 
@@ -426,7 +444,7 @@ if (input.fPort === 100) {
 				var val = decode_field(arg, 1, 7, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['default_gnss_scan_mode'] = "Static scanning mode ";
+						decoded_data['default_gnss_scan_mode'] = "Static scanning mode";
 						break;
 					case 1:
 						decoded_data['default_gnss_scan_mode'] = "Mobile scanning mode";
@@ -616,6 +634,37 @@ if (input.fPort === 100) {
 			fn: function(arg) { 
 				decoded_data['acceleration_event_grace_period'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
+			}
+		},
+		{
+			key: [0x46],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('acceleration_event_tx')) {
+					decoded_data['acceleration_event_tx'] = {};
+				}
+				var val = decode_field(arg, 1, 1, 1, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['acceleration_event_tx']['acceleration_assist'] = "Disable";
+						break;
+					case 1:
+						decoded_data['acceleration_event_tx']['acceleration_assist'] = "Enable";
+						break;
+					default:
+						decoded_data['acceleration_event_tx']['acceleration_assist'] = "Invalid";
+				}}
+				var val = decode_field(arg, 1, 0, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['acceleration_event_tx']['acceleration_alarm'] = "Disable";
+						break;
+					case 1:
+						decoded_data['acceleration_event_tx']['acceleration_alarm'] = "Enable";
+						break;
+					default:
+						decoded_data['acceleration_event_tx']['acceleration_alarm'] = "Invalid";
+				}}
+				return 1;
 			}
 		},
 		{
@@ -893,7 +942,7 @@ if (input.fPort === 100) {
 						decoded_data['metadata']['loramac_region_id'] = "EU868";
 						break;
 					case 1:
-						decoded_data['metadata']['loramac_region_id'] = "US916";
+						decoded_data['metadata']['loramac_region_id'] = "US915";
 						break;
 					case 2:
 						decoded_data['metadata']['loramac_region_id'] = "AS923";
@@ -932,38 +981,6 @@ if (input.fPort === 100) {
 				decoded_data['ble_metadata']['stack_ver_minor'] = decode_field(arg, 6, 15, 8, "unsigned");
 				decoded_data['ble_metadata']['stack_ver_revision'] = decode_field(arg, 6, 7, 0, "unsigned");
 				return 6;
-			}
-		},
-	];
-}
-if (input.fPort === 16) {
-	decoder = [
-		{
-			key: [0x0D, 0x3C],
-			fn: function(arg) { 
-				decoded_data['num_satellites'] = decode_field(arg, 1, 7, 0, "unsigned");
-				return 1;
-			}
-		},
-		{
-			key: [0x0D, 0x64],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('min_max_satellite_snr')) {
-					decoded_data['min_max_satellite_snr'] = {};
-				}
-				decoded_data['min_max_satellite_snr']['avg_satellite_snr'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
-				return 2;
-			}
-		},
-		{
-			key: [0x0D, 0x63],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('min_max_satellite_snr')) {
-					decoded_data['min_max_satellite_snr'] = {};
-				}
-				decoded_data['min_max_satellite_snr']['min_satellite_snr'] = (decode_field(arg, 4, 15, 0, "signed") * 0.1).toFixed(1);
-				decoded_data['min_max_satellite_snr']['maxi_satellite_snr'] = (decode_field(arg, 4, 31, 16, "signed") * 0.1).toFixed(1);
-				return 4;
 			}
 		},
 	];
