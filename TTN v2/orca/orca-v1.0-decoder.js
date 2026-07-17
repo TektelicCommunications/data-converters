@@ -863,24 +863,24 @@ if (input.fPort === 100) {
 		},
 	];
 }
-if (input.fPort === 10) {
+if (input.fPort === 16) {
 	decoder = [
 		{
-			key: [0x00, 0xAA],
+			key: [0x0D, 0x3C],
 			fn: function(arg) { 
 				decoded_data['num_satellites'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
 		{
-			key: [0x00, 0xAB],
+			key: [0x0D, 0x64],
 			fn: function(arg) { 
 				decoded_data['avg_satellite_snr'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
 				return 2;
 			}
 		},
 		{
-			key: [0x00, 0xAC],
+			key: [0x0D, 0x95],
 			fn: function(arg) { 
 				var val = decode_field(arg, 1, 7, 0, "unsigned");
 				{switch (val){
@@ -900,12 +900,30 @@ if (input.fPort === 10) {
 			}
 		},
 		{
-			key: [0x00, 0xAD],
+			key: [0x0D, 0x96],
+			fn: function(arg) { 
+				decoded_data['time_to_fix'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+			}
+		},
+		{
+			key: [0x0D, 0x0F],
 			fn: function(arg) { 
 				decoded_data['log_num'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
+		{
+			key: [0x0D, 0x04],
+			fn: function(arg) { 
+				decoded_data['ghost_error_count'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+			}
+		},
+	];
+}
+if (input.fPort === 10) {
+	decoder = [
 		{
 			key: [0x01, 0xBA],
 			fn: function(arg) { 

@@ -536,7 +536,7 @@ function encodeDownlink(input) {
                 "bit_end": 40,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "1.07E-05",
+                "coefficient": "(90/2**23)",
                 "access": "RW",
                 "multiple": 0
             },
@@ -546,7 +546,7 @@ function encodeDownlink(input) {
                 "bit_end": 16,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "2.15E-05",
+                "coefficient": "(180/2**23)",
                 "access": "RW",
                 "multiple": 0
             },
@@ -571,7 +571,7 @@ function encodeDownlink(input) {
                 "bit_end": 40,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "1.07E-05",
+                "coefficient": "(90/2**23)",
                 "access": "RW",
                 "multiple": 0
             },
@@ -581,7 +581,7 @@ function encodeDownlink(input) {
                 "bit_end": 16,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "2.15E-05",
+                "coefficient": "(180/2**23)",
                 "access": "RW",
                 "multiple": 0
             },
@@ -606,7 +606,7 @@ function encodeDownlink(input) {
                 "bit_end": 40,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "1.07E-05",
+                "coefficient": "(90/2**23)",
                 "access": "RW",
                 "multiple": 0
             },
@@ -616,7 +616,7 @@ function encodeDownlink(input) {
                 "bit_end": 16,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "2.15E-05",
+                "coefficient": "(180/2**23)",
                 "access": "RW",
                 "multiple": 0
             },
@@ -641,7 +641,7 @@ function encodeDownlink(input) {
                 "bit_end": 40,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "1.07E-05",
+                "coefficient": "(90/2**23)",
                 "access": "RW",
                 "multiple": 0
             },
@@ -651,7 +651,7 @@ function encodeDownlink(input) {
                 "bit_end": 16,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "2.15E-05",
+                "coefficient": "(180/2**23)",
                 "access": "RW",
                 "multiple": 0
             },
@@ -1642,7 +1642,7 @@ function encodeDownlink(input) {
                 "bit_end": 40,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "1.07E-05",
+                "coefficient": "(90/2**23)",
                 "access": "R",
                 "multiple": 0
             },
@@ -1652,7 +1652,7 @@ function encodeDownlink(input) {
                 "bit_end": 16,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "2.15E-05",
+                "coefficient": "(180/2**23)",
                 "access": "R",
                 "multiple": 0
             },
@@ -1660,19 +1660,30 @@ function encodeDownlink(input) {
                 "data_size": 9,
                 "bit_start": 15,
                 "bit_end": 0,
-                "type": "signed",
+                "type": "unsigned",
                 "round": 3,
-                "coefficient": "0.144958496",
+                "coefficient": "(9500/2**16)",
                 "access": "R",
-                "multiple": 0
+                "multiple": 0,
+                "addition": "-500"
             }
         },
         "log_all": {
             "header": "0x03",
             "or_80_to_write": "",
             "port": 15,
+            "fragment_number_3": {
+                "data_size": 13,
+                "bit_start": 103,
+                "bit_end": 96,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "R",
+                "multiple": 1
+            },
             "year_3": {
-                "data_size": 12,
+                "data_size": 13,
                 "bit_start": 95,
                 "bit_end": 90,
                 "type": "unsigned",
@@ -1682,7 +1693,7 @@ function encodeDownlink(input) {
                 "multiple": 1
             },
             "month_3": {
-                "data_size": 12,
+                "data_size": 13,
                 "bit_start": 89,
                 "bit_end": 86,
                 "type": "unsigned",
@@ -1692,7 +1703,7 @@ function encodeDownlink(input) {
                 "multiple": 1
             },
             "day_3": {
-                "data_size": 12,
+                "data_size": 13,
                 "bit_start": 85,
                 "bit_end": 81,
                 "type": "unsigned",
@@ -1702,7 +1713,7 @@ function encodeDownlink(input) {
                 "multiple": 1
             },
             "hour_3": {
-                "data_size": 12,
+                "data_size": 13,
                 "bit_start": 80,
                 "bit_end": 76,
                 "type": "unsigned",
@@ -1712,7 +1723,7 @@ function encodeDownlink(input) {
                 "multiple": 1
             },
             "minute_3": {
-                "data_size": 12,
+                "data_size": 13,
                 "bit_start": 75,
                 "bit_end": 70,
                 "type": "unsigned",
@@ -1722,7 +1733,7 @@ function encodeDownlink(input) {
                 "multiple": 1
             },
             "second_3": {
-                "data_size": 12,
+                "data_size": 13,
                 "bit_start": 69,
                 "bit_end": 64,
                 "type": "unsigned",
@@ -1732,34 +1743,35 @@ function encodeDownlink(input) {
                 "multiple": 1
             },
             "latitude_3": {
-                "data_size": 12,
+                "data_size": 13,
                 "bit_start": 63,
                 "bit_end": 40,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "1.07E-05",
+                "coefficient": "(90/2**23)",
                 "access": "R",
                 "multiple": 1
             },
             "longitude_3": {
-                "data_size": 12,
+                "data_size": 13,
                 "bit_start": 39,
                 "bit_end": 16,
                 "type": "signed",
                 "round": 7,
-                "coefficient": "2.15E-05",
+                "coefficient": "(180/2**23)",
                 "access": "R",
                 "multiple": 1
             },
             "altitude_3": {
-                "data_size": 12,
+                "data_size": 13,
                 "bit_start": 15,
                 "bit_end": 0,
-                "type": "signed",
+                "type": "unsigned",
                 "round": 3,
-                "coefficient": "0.144958496",
+                "coefficient": "(9500/2**16)",
                 "access": "R",
-                "multiple": 1
+                "multiple": 1,
+                "addition": "-500"
             }
         }
     }
@@ -2127,13 +2139,47 @@ function encodeDownlink(input) {
         write_to_port(bytes, lookup["port"], encoded_data);
     }
 
+    function coefficient_to_number(coefficient) {
+        if (coefficient === "" || coefficient === undefined || coefficient === null) {
+            return 1;
+        }
+        if (typeof coefficient === "number") {
+            return coefficient;
+        }
+
+        var expression = String(coefficient).trim();
+        var number = Number(expression);
+        if (!isNaN(number)) {
+            return number;
+        }
+
+        expression = expression.replace(/^\((.*)\)$/, "$1").replace(/\s+/g, "");
+        var fraction = expression.split("/");
+        if (fraction.length === 2) {
+            var numerator = Number(fraction[0]);
+            var denominator = fraction[1];
+            if (denominator.indexOf("**") !== -1) {
+                var power = denominator.split("**");
+                denominator = Math.pow(Number(power[0]), Number(power[1]));
+            } else {
+                denominator = Number(denominator);
+            }
+
+            if (!isNaN(numerator) && !isNaN(denominator)) {
+                return numerator / denominator;
+            }
+        }
+
+        throw new Error("Invalid coefficient: " + coefficient);
+    }
+
     function encode_write_field(command, lookup, encoded_data) {
         var bytes = format_header(lookup["header"], false, lookup["or_80_to_write"]);
 
         var value = command["write"];
         if ( (lookup["type"] !== "string") && (lookup["type"] !== "hexstring") ) {
             value = Number(value) - Number(lookup["addition"] ? lookup["addition"] : 0)
-            value = Number(value)/Number(lookup["coefficient"]);
+            value = Number(value)/coefficient_to_number(lookup["coefficient"]);
             // TODO: ideally this should be done inside of write_bits, not before it
         }
 
@@ -2177,7 +2223,7 @@ function encodeDownlink(input) {
 
             if ( (lookup["type"] !== "string") && (lookup["type"] !== "hexstring") ) {
                 value = Number(value) - Number(lookup["addition"] ? lookup["addition"] : 0)
-                value = Number(value)/Number(lookup["coefficient"]);
+                value = Number(value)/coefficient_to_number(lookup["coefficient"]);
                 // TODO: ideally this should be done inside of write_bits, not before it
             }
 

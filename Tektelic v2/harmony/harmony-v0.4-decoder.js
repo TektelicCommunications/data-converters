@@ -59,49 +59,62 @@ if (input.fPort === 10) {
 			}
 		},
 		{
-			key: [0x23, 0x6C],
+			key: [0x03, 0x67],
 			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('periodic_uplink')) {
 					decoded_data['periodic_uplink'] = {};
 				}
-				decoded_data['periodic_uplink']['temperature_setpoint'] = decode_field(arg, 1, 7, 0, "unsigned") * 0.5;
+				decoded_data['periodic_uplink']['ambient_temperature'] = (decode_field(arg, 1, 7, 0, "signed") * 0.5).toFixed(1);
 				return 1;
 			}
 		},
 		{
-			key: [0x24, 0x6A],
+			key: [0x04, 0x68],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('thermostat_configuration')) {
-					decoded_data['thermostat_configuration'] = {};
+				if(!decoded_data.hasOwnProperty('periodic_uplink')) {
+					decoded_data['periodic_uplink'] = {};
 				}
-				var val = decode_field(arg, 1, 3, 0, "unsigned");
+				decoded_data['periodic_uplink']['relative_humidity'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
+			}
+		},
+		{
+			key: [0x0B, 0xE4],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('periodic_uplink')) {
+					decoded_data['periodic_uplink'] = {};
+				}
+				decoded_data['periodic_uplink']['CO2_concentration'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+			}
+		},
+		{
+			key: [0x02, 0x00],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('ambient_light')) {
+					decoded_data['ambient_light'] = {};
+				}
+				var val = decode_field(arg, 1, 0, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['thermostat_configuration']['thermostat_mode'] = "Auto";
+						decoded_data['ambient_light']['ambient_light_state'] = "Dark";
 						break;
 					case 1:
-						decoded_data['thermostat_configuration']['thermostat_mode'] = "Eco";
+						decoded_data['ambient_light']['ambient_light_state'] = "Bright";
 						break;
 					default:
-						decoded_data['thermostat_configuration']['thermostat_mode'] = "Invalid";
+						decoded_data['ambient_light']['ambient_light_state'] = "Invalid";
 				}}
-				var val = decode_field(arg, 1, 7, 4, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Off";
-						break;
-					case 1:
-						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Low";
-						break;
-					case 2:
-						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Medium";
-						break;
-					case 3:
-						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "High";
-						break;
-					default:
-						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Invalid";
-				}}
+				return 1;
+			}
+		},
+		{
+			key: [0x10, 0x02],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('ambient_light')) {
+					decoded_data['ambient_light'] = {};
+				}
+				decoded_data['ambient_light']['ambient_light_intensity'] = decode_field(arg, 1, 6, 0, "unsigned");
 				return 1;
 			}
 		},
@@ -170,62 +183,49 @@ if (input.fPort === 10) {
 			}
 		},
 		{
-			key: [0x03, 0x67],
+			key: [0x23, 0x6C],
 			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('periodic_uplink')) {
 					decoded_data['periodic_uplink'] = {};
 				}
-				decoded_data['periodic_uplink']['ambient_temperature'] = (decode_field(arg, 1, 7, 0, "signed") * 0.5).toFixed(1);
+				decoded_data['periodic_uplink']['temperature_setpoint'] = decode_field(arg, 1, 7, 0, "unsigned") * 0.5;
 				return 1;
 			}
 		},
 		{
-			key: [0x04, 0x68],
+			key: [0x24, 0x6A],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('periodic_uplink')) {
-					decoded_data['periodic_uplink'] = {};
+				if(!decoded_data.hasOwnProperty('thermostat_configuration')) {
+					decoded_data['thermostat_configuration'] = {};
 				}
-				decoded_data['periodic_uplink']['relative_humidity'] = decode_field(arg, 1, 7, 0, "unsigned");
-				return 1;
-			}
-		},
-		{
-			key: [0x0B, 0xE4],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('periodic_uplink')) {
-					decoded_data['periodic_uplink'] = {};
-				}
-				decoded_data['periodic_uplink']['CO2_concentration'] = decode_field(arg, 2, 15, 0, "unsigned");
-				return 2;
-			}
-		},
-		{
-			key: [0x02, 0x00],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('ambient_light')) {
-					decoded_data['ambient_light'] = {};
-				}
-				var val = decode_field(arg, 1, 0, 0, "unsigned");
+				var val = decode_field(arg, 1, 3, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['ambient_light']['ambient_light_state'] = "Dark";
+						decoded_data['thermostat_configuration']['thermostat_mode'] = "Auto";
 						break;
 					case 1:
-						decoded_data['ambient_light']['ambient_light_state'] = "Bright";
+						decoded_data['thermostat_configuration']['thermostat_mode'] = "Eco";
 						break;
 					default:
-						decoded_data['ambient_light']['ambient_light_state'] = "Invalid";
+						decoded_data['thermostat_configuration']['thermostat_mode'] = "Invalid";
 				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x10, 0x02],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('ambient_light')) {
-					decoded_data['ambient_light'] = {};
-				}
-				decoded_data['ambient_light']['ambient_light_intensity'] = decode_field(arg, 1, 6, 0, "unsigned");
+				var val = decode_field(arg, 1, 7, 4, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Off";
+						break;
+					case 1:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Low";
+						break;
+					case 2:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Medium";
+						break;
+					case 3:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "High";
+						break;
+					default:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Invalid";
+				}}
 				return 1;
 			}
 		},
@@ -421,6 +421,117 @@ if (input.fPort === 20) {
 				}
 				decoded_data['connector_IO1']['connector_IO1_ecm'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
+			}
+		},
+		{
+			key: [0x25, 0x01],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('relay_status')) {
+					decoded_data['relay_status'] = {};
+				}
+				var val = decode_field(arg, 1, 0, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['relay_status']['relay_1_status'] = "Inactive";
+						break;
+					case 1:
+						decoded_data['relay_status']['relay_1_status'] = "Active";
+						break;
+					default:
+						decoded_data['relay_status']['relay_1_status'] = "Invalid";
+				}}
+				var val = decode_field(arg, 1, 1, 1, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['relay_status']['relay_2_status'] = "Inactive";
+						break;
+					case 1:
+						decoded_data['relay_status']['relay_2_status'] = "Active";
+						break;
+					default:
+						decoded_data['relay_status']['relay_2_status'] = "Invalid";
+				}}
+				var val = decode_field(arg, 1, 2, 2, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['relay_status']['relay_3_status'] = "Inactive";
+						break;
+					case 1:
+						decoded_data['relay_status']['relay_3_status'] = "Active";
+						break;
+					default:
+						decoded_data['relay_status']['relay_3_status'] = "Invalid";
+				}}
+				var val = decode_field(arg, 1, 3, 3, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['relay_status']['relay_4_status'] = "Inactive";
+						break;
+					case 1:
+						decoded_data['relay_status']['relay_4_status'] = "Active";
+						break;
+					default:
+						decoded_data['relay_status']['relay_4_status'] = "Invalid";
+				}}
+				var val = decode_field(arg, 1, 4, 4, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['relay_status']['relay_5_status'] = "Inactive";
+						break;
+					case 1:
+						decoded_data['relay_status']['relay_5_status'] = "Active";
+						break;
+					default:
+						decoded_data['relay_status']['relay_5_status'] = "Invalid";
+				}}
+				return 1;
+			}
+		},
+		{
+			key: [0x23, 0x6C],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('periodic_uplink')) {
+					decoded_data['periodic_uplink'] = {};
+				}
+				decoded_data['periodic_uplink']['temperature_setpoint'] = decode_field(arg, 1, 7, 0, "unsigned") * 0.5;
+				return 1;
+			}
+		},
+		{
+			key: [0x24, 0x6A],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('thermostat_configuration')) {
+					decoded_data['thermostat_configuration'] = {};
+				}
+				var val = decode_field(arg, 1, 3, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['thermostat_configuration']['thermostat_mode'] = "Auto";
+						break;
+					case 1:
+						decoded_data['thermostat_configuration']['thermostat_mode'] = "Eco";
+						break;
+					default:
+						decoded_data['thermostat_configuration']['thermostat_mode'] = "Invalid";
+				}}
+				var val = decode_field(arg, 1, 7, 4, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Off";
+						break;
+					case 1:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Low";
+						break;
+					case 2:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Medium";
+						break;
+					case 3:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "High";
+						break;
+					default:
+						decoded_data['thermostat_configuration']['thermostat_fan_speed'] = "Invalid";
+				}}
+				return 1;
 			}
 		},
 	];
@@ -695,8 +806,8 @@ if (input.fPort === 100) {
 					case 7:
 						decoded_data['wiring_mode_setup'] = "4-Pipe COOLING ONLY, 2-Wire Valve";
 						break;
-					case 9:
-						decoded_data['wiring_mode_setup'] = "2-Pipe COOLING, Electric Heater";
+					case 8:
+						decoded_data['wiring_mode_setup'] = "2-Pipe HEATING, Electric Heater";
 						break;
 					case 10:
 						decoded_data['wiring_mode_setup'] = "2-Pipe Changeover Temperature Sensor, 2-Wire Valve";
