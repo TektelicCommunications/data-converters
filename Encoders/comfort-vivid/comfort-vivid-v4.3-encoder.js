@@ -5,8 +5,8 @@ function encodeDownlink(input) {
         "loramac_join_mode": {
             "header": "0x10",
             "data_size": 2,
-            "bit_start": 15,
-            "bit_end": 15,
+            "bit_start": 14,
+            "bit_end": 14,
             "type": "unsigned",
             "round": "",
             "coefficient": 1,
@@ -711,26 +711,6 @@ function encodeDownlink(input) {
                 "access": "RW",
                 "multiple": 0
             },
-            "pir_range": {
-                "data_size": 1,
-                "bit_start": 4,
-                "bit_end": 4,
-                "type": "unsigned",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            },
-            "pir_presence_flag": {
-                "data_size": 1,
-                "bit_start": 5,
-                "bit_end": 5,
-                "type": "unsigned",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            },
             "event_transmission_enabled": {
                 "data_size": 1,
                 "bit_start": 6,
@@ -827,54 +807,6 @@ function encodeDownlink(input) {
             "multiple": 0,
             "port": 100,
             "or_80_to_write": 1
-        },
-        "pir_fov_object_temp": {
-            "header": "0x3F",
-            "data_size": 1,
-            "bit_start": 7,
-            "bit_end": 0,
-            "type": "unsigned",
-            "round": "",
-            "coefficient": 1,
-            "access": "RW",
-            "multiple": 0,
-            "port": 100,
-            "or_80_to_write": 1
-        },
-        "fov_temp_thresholds": {
-            "header": "0x4C",
-            "or_80_to_write": 1,
-            "port": 100,
-            "fov_object_temp_high": {
-                "data_size": 3,
-                "bit_start": 15,
-                "bit_end": 8,
-                "type": "signed",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            },
-            "fov_object_temp_low": {
-                "data_size": 3,
-                "bit_start": 7,
-                "bit_end": 0,
-                "type": "signed",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            },
-            "fov_object_temp_thresholds_enabled": {
-                "data_size": 3,
-                "bit_start": 23,
-                "bit_end": 23,
-                "type": "unsigned",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            }
         }
     },
     "accelerometer_config": {
@@ -953,7 +885,7 @@ function encodeDownlink(input) {
                 "multiple": 0
             }
         },
-        "accelerometer_sensitivityAccelerometer Sensitivity": {
+        "accelerometer_sensitivity": {
             "header": "0x35",
             "or_80_to_write": 1,
             "port": 100,

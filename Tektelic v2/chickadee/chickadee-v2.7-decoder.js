@@ -130,7 +130,6 @@ if (input.fPort === 10) {
 					default:
 						decoded_data['acceleration_alarm'] = "Invalid";
 				}}
-				decoded_data['gnss_fix'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
 			}
 		},
@@ -174,16 +173,16 @@ if (input.fPort === 10) {
 				if(!decoded_data.hasOwnProperty('coordinates')) {
 					decoded_data['coordinates'] = {};
 				}
-				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 0.0000107288360595703125).toFixed(7);
-				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 0.000021457672119140625).toFixed(7);
-				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.144958496 + -500).toFixed(2);
+				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * (90/2**23)).toFixed(7);
+				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * (180/2**23)).toFixed(7);
+				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * (9500/2**16) + -500).toFixed(2);
 				return 8;
 			}
 		},
 		{
 			key: [0x00, 0x92],
 			fn: function(arg) { 
-				decoded_data['ground_speed'] = (decode_field(arg, 1, 7, 0, "unsigned") * 0.27778).toFixed(3);
+				decoded_data['ground_speed'] = (decode_field(arg, 1, 7, 0, "unsigned") * (5/18)).toFixed(3);
 				return 1;
 			}
 		},
@@ -553,8 +552,8 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('assist_coordinates')) {
 					decoded_data['assist_coordinates'] = {};
 				}
-				decoded_data['assist_coordinates']['latitude_lpgnss'] = (decode_field(arg, 8, 63, 40, "unsigned") * 0.0000107288360595703125).toFixed(7);
-				decoded_data['assist_coordinates']['longitude_lpgnss'] = (decode_field(arg, 8, 39, 16, "unsigned") * 0.000021457672119140625).toFixed(7);
+				decoded_data['assist_coordinates']['latitude_lpgnss'] = (decode_field(arg, 8, 63, 40, "unsigned") * (90/2**23)).toFixed(7);
+				decoded_data['assist_coordinates']['longitude_lpgnss'] = (decode_field(arg, 8, 39, 16, "unsigned") * (180/2**23)).toFixed(7);
 				var val = decode_field(arg, 8, 0, 0, "unsigned");
 				{switch (val){
 					case 0:

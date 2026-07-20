@@ -25,10 +25,10 @@ function Decoder(bytes, port) {
 								invalid_registers.push("0x" + arg[i].toString(16));
 							}
 							arg = arg.slice(num_invalid_writes);
-							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from downlink (' + downlink_fcnt + ') for register(s): ' + invalid_registers);
 						}
 						else {
-							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+							responses.push('All write commands from downlink (' + downlink_fcnt + ') were successful');
 						}
 						invalid_registers = [];
 					}
@@ -44,7 +44,7 @@ if (input.fPort === 100) {
 		{
 			key: [0x10],
 			fn: function(arg) { 
-				var val = decode_field(arg, 2, 15, 15, "unsigned");
+				var val = decode_field(arg, 2, 14, 14, "unsigned");
 				{switch (val){
 					case 0:
 						decoded_data['loramac_join_mode'] = "ABP";
@@ -624,28 +624,6 @@ if (input.fPort === 100) {
 					default:
 						decoded_data['pir_mode']['pir_value_reported'] = "Invalid";
 				}}
-				var val = decode_field(arg, 1, 4, 4, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['pir_mode']['pir_range'] = "Long-range Detection";
-						break;
-					case 1:
-						decoded_data['pir_mode']['pir_range'] = "Short-range Detection";
-						break;
-					default:
-						decoded_data['pir_mode']['pir_range'] = "Invalid";
-				}}
-				var val = decode_field(arg, 1, 5, 5, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['pir_mode']['pir_presence_flag'] = "Presence Detection";
-						break;
-					case 1:
-						decoded_data['pir_mode']['pir_presence_flag'] = "Motion Detection";
-						break;
-					default:
-						decoded_data['pir_mode']['pir_presence_flag'] = "Invalid";
-				}}
 				var val = decode_field(arg, 1, 6, 6, "unsigned");
 				{switch (val){
 					case 0:
@@ -698,45 +676,6 @@ if (input.fPort === 100) {
 			fn: function(arg) { 
 				decoded_data['pir_init_retries'] = decode_field(arg, 1, 7, 0, "unsigned");
 				return 1;
-			}
-		},
-		{
-			key: [0x3F],
-			fn: function(arg) { 
-				var val = decode_field(arg, 1, 7, 0, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['pir_fov_object_temp'] = "Disable";
-						break;
-					case 1:
-						decoded_data['pir_fov_object_temp'] = "Enable";
-						break;
-					default:
-						decoded_data['pir_fov_object_temp'] = "Invalid";
-				}}
-				return 1;
-			}
-		},
-		{
-			key: [0x4C],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('fov_temp_thresholds')) {
-					decoded_data['fov_temp_thresholds'] = {};
-				}
-				decoded_data['fov_temp_thresholds']['fov_object_temp_high'] = decode_field(arg, 3, 15, 8, "signed");
-				decoded_data['fov_temp_thresholds']['fov_object_temp_low'] = decode_field(arg, 3, 7, 0, "signed");
-				var val = decode_field(arg, 3, 23, 23, "unsigned");
-				{switch (val){
-					case 0:
-						decoded_data['fov_temp_thresholds']['fov_object_temp_thresholds_enabled'] = "Disable";
-						break;
-					case 1:
-						decoded_data['fov_temp_thresholds']['fov_object_temp_thresholds_enabled'] = "Enable";
-						break;
-					default:
-						decoded_data['fov_temp_thresholds']['fov_object_temp_thresholds_enabled'] = "Invalid";
-				}}
-				return 3;
 			}
 		},
 		{
@@ -834,51 +773,51 @@ if (input.fPort === 100) {
 		{
 			key: [0x35],
 			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('accelerometer_sensitivityAccelerometer Sensitivity')) {
-					decoded_data['accelerometer_sensitivityAccelerometer Sensitivity'] = {};
+				if(!decoded_data.hasOwnProperty('accelerometer_sensitivity')) {
+					decoded_data['accelerometer_sensitivity'] = {};
 				}
 				var val = decode_field(arg, 1, 2, 0, "unsigned");
 				{switch (val){
 					case 1:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_sample_rate'] = "1 Hz";
+						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "1 Hz";
 						break;
 					case 2:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_sample_rate'] = "10 Hz";
+						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "10 Hz";
 						break;
 					case 3:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_sample_rate'] = "25 Hz";
+						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "25 Hz";
 						break;
 					case 4:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_sample_rate'] = "50 Hz";
+						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "50 Hz";
 						break;
 					case 5:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_sample_rate'] = "100 Hz";
+						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "100 Hz";
 						break;
 					case 6:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_sample_rate'] = "200 Hz";
+						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "200 Hz";
 						break;
 					case 7:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_sample_rate'] = "400 Hz";
+						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "400 Hz";
 						break;
 					default:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_sample_rate'] = "Invalid";
+						decoded_data['accelerometer_sensitivity']['accelerometer_sample_rate'] = "Invalid";
 				}}
 				var val = decode_field(arg, 1, 5, 4, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_measurement_range'] = "+/- 2 g";
+						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "+/- 2 g";
 						break;
 					case 1:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_measurement_range'] = "+/-4 g";
+						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "+/-4 g";
 						break;
 					case 2:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_measurement_range'] = "+/-8 g";
+						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "+/-8 g";
 						break;
 					case 3:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_measurement_range'] = "+/-16 g";
+						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "+/-16 g";
 						break;
 					default:
-						decoded_data['accelerometer_sensitivityAccelerometer Sensitivity']['accelerometer_measurement_range'] = "Invalid";
+						decoded_data['accelerometer_sensitivity']['accelerometer_measurement_range'] = "Invalid";
 				}}
 				return 1;
 			}
@@ -1756,7 +1695,6 @@ if (input.fPort === 5) {
 				if(!decoded_data.hasOwnProperty('sensor_error_diagnostics')) {
 					decoded_data['sensor_error_diagnostics'] = {};
 				}
-				decoded_data['sensor_error_diagnostics']['barometer_failure'] = decode_field(arg, 5, 15, 8, "unsigned");
 				decoded_data['sensor_error_diagnostics']['i2c_failure'] = decode_field(arg, 5, 7, 0, "unsigned");
 				return 5;
 			}

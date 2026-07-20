@@ -24,10 +24,10 @@
 								invalid_registers.push("0x" + arg[i].toString(16));
 							}
 							arg = arg.slice(num_invalid_writes);
-							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from downlink (' + downlink_fcnt + ') for register(s): ' + invalid_registers);
 						}
 						else {
-							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+							responses.push('All write commands from downlink (' + downlink_fcnt + ') were successful');
 						}
 						invalid_registers = [];
 					}
@@ -75,16 +75,16 @@ if (input.fPort === 10) {
 				if(!decoded_data.hasOwnProperty('coordinates')) {
 					decoded_data['coordinates'] = {};
 				}
-				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
-				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
-				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * 0.144958496 + -500).toFixed(2);
+				decoded_data['coordinates']['latitude'] = (decode_field(arg, 8, 63, 40, "signed") * (90/2**23)).toFixed(7);
+				decoded_data['coordinates']['longitude'] = (decode_field(arg, 8, 39, 16, "signed") * (180/2**23)).toFixed(7);
+				decoded_data['coordinates']['altitude'] = (decode_field(arg, 8, 15, 0, "unsigned") * (9500/2**16) + -500).toFixed(2);
 				return 8;
 			}
 		},
 		{
 			key: [0x00, 0x92],
 			fn: function(arg) { 
-				decoded_data['ground_speed'] = (decode_field(arg, 1, 7, 0, "unsigned") * 	0.27778 ).toFixed(3);
+				decoded_data['ground_speed'] = (decode_field(arg, 1, 7, 0, "unsigned") * (5/18)).toFixed(3);
 				return 1;
 			}
 		},
@@ -788,8 +788,8 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('gnss_dz0')) {
 					decoded_data['gnss_dz0'] = {};
 				}
-				decoded_data['gnss_dz0']['gnss_dz0_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
-				decoded_data['gnss_dz0']['gnss_dz0_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
+				decoded_data['gnss_dz0']['gnss_dz0_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * (90/2**23)).toFixed(7);
+				decoded_data['gnss_dz0']['gnss_dz0_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * (180/2**23)).toFixed(7);
 				decoded_data['gnss_dz0']['gnss_dz0_radius'] = (decode_field(arg, 8, 15, 0, "signed") * 10).toFixed(1);
 				return 8;
 			}
@@ -800,8 +800,8 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('gnss_dz1')) {
 					decoded_data['gnss_dz1'] = {};
 				}
-				decoded_data['gnss_dz1']['gnss_dz1_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
-				decoded_data['gnss_dz1']['gnss_dz1_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
+				decoded_data['gnss_dz1']['gnss_dz1_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * (90/2**23)).toFixed(7);
+				decoded_data['gnss_dz1']['gnss_dz1_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * (180/2**23)).toFixed(7);
 				decoded_data['gnss_dz1']['gnss_dz1_radius'] = (decode_field(arg, 8, 15, 0, "signed") * 10).toFixed(1);
 				return 8;
 			}
@@ -812,8 +812,8 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('gnss_dz2')) {
 					decoded_data['gnss_dz2'] = {};
 				}
-				decoded_data['gnss_dz2']['gnss_dz2_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
-				decoded_data['gnss_dz2']['gnss_dz2_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
+				decoded_data['gnss_dz2']['gnss_dz2_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * (90/2**23)).toFixed(7);
+				decoded_data['gnss_dz2']['gnss_dz2_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * (180/2**23)).toFixed(7);
 				decoded_data['gnss_dz2']['gnss_dz2_radius'] = (decode_field(arg, 8, 15, 0, "signed") * 10).toFixed(1);
 				return 8;
 			}
@@ -824,8 +824,8 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('gnss_dz3')) {
 					decoded_data['gnss_dz3'] = {};
 				}
-				decoded_data['gnss_dz3']['gnss_dz3_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * 1.07E-05).toFixed(7);
-				decoded_data['gnss_dz3']['gnss_dz3_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * 2.15E-05).toFixed(7);
+				decoded_data['gnss_dz3']['gnss_dz3_latitude'] = (decode_field(arg, 8, 63, 40, "signed") * (90/2**23)).toFixed(7);
+				decoded_data['gnss_dz3']['gnss_dz3_longitude'] = (decode_field(arg, 8, 39, 16, "signed") * (180/2**23)).toFixed(7);
 				decoded_data['gnss_dz3']['gnss_dz3_radius'] = (decode_field(arg, 8, 15, 0, "signed") * 10).toFixed(1);
 				return 8;
 			}
@@ -1312,9 +1312,9 @@ if (input.fPort === 15) {
 					decoded_data['log_coordinates'] = {};
 				}
 				decoded_data['log_coordinates']['fragment_number_2'] = decode_field(arg, 9, 71, 64, "unsigned");
-				decoded_data['log_coordinates']['latitude_2'] = (decode_field(arg, 9, 63, 40, "signed") * 1.07E-05).toFixed(7);
-				decoded_data['log_coordinates']['longitude_2'] = (decode_field(arg, 9, 39, 16, "signed") * 2.15E-05).toFixed(7);
-				decoded_data['log_coordinates']['altitude_2'] = (decode_field(arg, 9, 15, 0, "signed") * 0.144958496 + -500).toFixed(3);
+				decoded_data['log_coordinates']['latitude_2'] = (decode_field(arg, 9, 63, 40, "signed") * (90/2**23)).toFixed(7);
+				decoded_data['log_coordinates']['longitude_2'] = (decode_field(arg, 9, 39, 16, "signed") * (180/2**23)).toFixed(7);
+				decoded_data['log_coordinates']['altitude_2'] = (decode_field(arg, 9, 15, 0, "unsigned") * (9500/2**16) + -500).toFixed(3);
 				return 9;
 			}
 		},
@@ -1325,23 +1325,24 @@ if (input.fPort === 15) {
 					decoded_data['log_all'] = {};
 				}
 					var data = [];
-					var loop = arg.length / 12;
+					var loop = arg.length / 13;
 					for (var i = 0; i < loop; i++) {
 						var group = {};
-						group['year_3'] = decode_field(arg, 12, 95, 90, "unsigned");
-						group['month_3'] = decode_field(arg, 12, 89, 86, "unsigned");
-						group['day_3'] = decode_field(arg, 12, 85, 81, "unsigned");
-						group['hour_3'] = decode_field(arg, 12, 80, 76, "unsigned");
-						group['minute_3'] = decode_field(arg, 12, 75, 70, "unsigned");
-						group['second_3'] = decode_field(arg, 12, 69, 64, "unsigned");
-						group['latitude_3'] = decode_field(arg, 12, 63, 40, "signed");
-						group['longitude_3'] = decode_field(arg, 12, 39, 16, "signed");
-						group['altitude_3'] = decode_field(arg, 12, 15, 0, "signed");
+						group['fragment_number_3'] = decode_field(arg, 13, 103, 96, "unsigned");
+						group['year_3'] = decode_field(arg, 13, 95, 90, "unsigned");
+						group['month_3'] = decode_field(arg, 13, 89, 86, "unsigned");
+						group['day_3'] = decode_field(arg, 13, 85, 81, "unsigned");
+						group['hour_3'] = decode_field(arg, 13, 80, 76, "unsigned");
+						group['minute_3'] = decode_field(arg, 13, 75, 70, "unsigned");
+						group['second_3'] = decode_field(arg, 13, 69, 64, "unsigned");
+						group['latitude_3'] = (decode_field(arg, 13, 63, 40, "signed") * (90/2**23)).toFixed(7);
+						group['longitude_3'] = (decode_field(arg, 13, 39, 16, "signed") * (180/2**23)).toFixed(7);
+						group['altitude_3'] = (decode_field(arg, 13, 15, 0, "unsigned") * (9500/2**16) + -500).toFixed(3);
 						data.push(group);
-						arg = arg.slice(12);
+						arg = arg.slice(13);
 					}
 					decoded_data['log_all'] = data;
-					return loop*12;
+					return loop*13;
 			}
 		},
 	];
@@ -1439,7 +1440,7 @@ if (input.fPort === 15) {
 				output = (output << 8) | bytes[i];
 			}
 			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			if (output >= Math.pow(2, 8 * bytes.length - 1)) {
 				output -= Math.pow(2, 8 * bytes.length);
 			}
 			return output;

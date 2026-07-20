@@ -419,6 +419,71 @@ function encodeDownlink(input) {
             "port": 100,
             "or_80_to_write": 1
         },
+        "gnss_diagnostics_tx": {
+            "header": "0x32",
+            "or_80_to_write": 1,
+            "port": 100,
+            "num_satellites": {
+                "data_size": 1,
+                "bit_start": 0,
+                "bit_end": 0,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "avg_satellite_snr": {
+                "data_size": 1,
+                "bit_start": 1,
+                "bit_end": 1,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "fix_type": {
+                "data_size": 1,
+                "bit_start": 2,
+                "bit_end": 2,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "time_to_fix": {
+                "data_size": 1,
+                "bit_start": 3,
+                "bit_end": 3,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "log_num": {
+                "data_size": 1,
+                "bit_start": 4,
+                "bit_end": 4,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "ghost_error_cnt": {
+                "data_size": 1,
+                "bit_start": 5,
+                "bit_end": 5,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            }
+        },
         "gnss_data_tx": {
             "header": "0x33",
             "or_80_to_write": 1,
@@ -600,73 +665,6 @@ function encodeDownlink(input) {
                 "type": "signed",
                 "round": 7,
                 "coefficient": "0.0000125",
-                "access": "RW",
-                "multiple": 0
-            }
-        }
-    },
-    "general": {
-        "gnss_diagnostics_tx": {
-            "header": "0x32",
-            "or_80_to_write": 1,
-            "port": 100,
-            "num_satellites": {
-                "data_size": 1,
-                "bit_start": 0,
-                "bit_end": 0,
-                "type": "unsigned",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            },
-            "avg_satellite_snr": {
-                "data_size": 1,
-                "bit_start": 1,
-                "bit_end": 1,
-                "type": "unsigned",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            },
-            "fix_type": {
-                "data_size": 1,
-                "bit_start": 2,
-                "bit_end": 2,
-                "type": "unsigned",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            },
-            "time_to_fix": {
-                "data_size": 1,
-                "bit_start": 3,
-                "bit_end": 3,
-                "type": "unsigned",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            },
-            "log_num": {
-                "data_size": 1,
-                "bit_start": 4,
-                "bit_end": 4,
-                "type": "unsigned",
-                "round": "",
-                "coefficient": 1,
-                "access": "RW",
-                "multiple": 0
-            },
-            "ghost_error_cnt": {
-                "data_size": 1,
-                "bit_start": 5,
-                "bit_end": 5,
-                "type": "unsigned",
-                "round": "",
-                "coefficient": 1,
                 "access": "RW",
                 "multiple": 0
             }
