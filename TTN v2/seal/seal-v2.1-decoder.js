@@ -92,7 +92,14 @@ if (input.fPort === 10) {
 		{
 			key: [0x00, 0x00],
 			fn: function(arg) { 
-				decoded_data['gnss_fix'] = decode_field(arg, 1, 7, 0, "unsigned");
+				var val = decode_field(arg, 1, 7, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['gnss_fix'] = "Invalid";
+						break;
+					default:
+						decoded_data['gnss_fix'] = "Invalid";
+				}}
 				return 1;
 			}
 		},
