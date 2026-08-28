@@ -429,7 +429,7 @@ function encodeDownlink(input) {
                 "data_size": 5,
                 "bit_start": 33,
                 "bit_end": 32,
-                "type": "hexstring",
+                "type": "unsigned",
                 "round": "",
                 "coefficient": 1,
                 "access": "RW",
