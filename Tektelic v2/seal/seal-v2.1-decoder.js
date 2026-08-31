@@ -82,7 +82,14 @@ if (input.fPort === 10) {
 		{
 			key: [0x00, 0x92],
 			fn: function(arg) { 
-				decoded_data['ground_speed'] = (decode_field(arg, 1, 7, 0, "unsigned") * (5/18)).toFixed(3);
+				var val = decode_field(arg, 1, 7, 0, "unsigned");
+				{switch (val){
+					case 255:
+						decoded_data['ground_speed'] = "Invalid";
+						break;
+					default:
+						decoded_data['ground_speed'] = (val * (5/18)).toFixed(3);
+				}}
 				return 1;
 			}
 		},
@@ -704,7 +711,7 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('sh_buzz_config')) {
 					decoded_data['sh_buzz_config'] = {};
 				}
-				var val = decode_field(arg, 5, 33, 32, "hexstring");
+				var val = decode_field(arg, 5, 33, 32, "unsigned");
 				{switch (val){
 					case 0:
 						decoded_data['sh_buzz_config']['sh_buzz_trigger_type'] = "Always";

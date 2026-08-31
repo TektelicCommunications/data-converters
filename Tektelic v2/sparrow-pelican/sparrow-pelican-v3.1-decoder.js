@@ -172,6 +172,90 @@ if (input.fPort === 100) {
 			}
 		},
 		{
+			key: [0x39],
+			fn: function(arg) { 
+				decoded_data['temp_rh_sample_period_idle'] = decode_field(arg, 4, 31, 0, "unsigned");
+				return 4;
+			}
+		},
+		{
+			key: [0x3A],
+			fn: function(arg) { 
+				decoded_data['temp_rh_sample_period_active'] = decode_field(arg, 4, 31, 0, "unsigned");
+				return 4;
+			}
+		},
+		{
+			key: [0x3B],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('temp_thresholds')) {
+					decoded_data['temp_thresholds'] = {};
+				}
+				decoded_data['temp_thresholds']['temp_threshold_high'] = decode_field(arg, 2, 15, 8, "signed");
+				decoded_data['temp_thresholds']['temp_threshold_low'] = decode_field(arg, 2, 7, 0, "signed");
+				return 2;
+			}
+		},
+		{
+			key: [0x3C],
+			fn: function(arg) { 
+				var val = decode_field(arg, 1, 7, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['temp_thresholds_enabled'] = "Disabled";
+						break;
+					case 1:
+						decoded_data['temp_thresholds_enabled'] = "Enabled";
+						break;
+					default:
+						decoded_data['temp_thresholds_enabled'] = "Invalid";
+				}}
+				return 1;
+			}
+		},
+		{
+			key: [0x3D],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('rh_thresholds')) {
+					decoded_data['rh_thresholds'] = {};
+				}
+				decoded_data['rh_thresholds']['rh_threshold_high'] = decode_field(arg, 2, 15, 8, "unsigned");
+				decoded_data['rh_thresholds']['rh_threshold_low'] = decode_field(arg, 2, 7, 0, "unsigned");
+				return 2;
+			}
+		},
+		{
+			key: [0x3E],
+			fn: function(arg) { 
+				var val = decode_field(arg, 1, 7, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['rh_thresholds_enabled'] = "Disabled";
+						break;
+					case 1:
+						decoded_data['rh_thresholds_enabled'] = "Enabled";
+						break;
+					default:
+						decoded_data['rh_thresholds_enabled'] = "Invalid";
+				}}
+				return 1;
+			}
+		},
+		{
+			key: [0x26],
+			fn: function(arg) { 
+				decoded_data['ticks_per_ambient_temperature'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+			}
+		},
+		{
+			key: [0x27],
+			fn: function(arg) { 
+				decoded_data['ticks_per_relative_humidity'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+			}
+		},
+		{
 			key: [0x21],
 			fn: function(arg) { 
 				decoded_data['ticks_per_battery'] = decode_field(arg, 2, 15, 0, "unsigned");
@@ -261,6 +345,48 @@ if (input.fPort === 100) {
 						decoded_data['fb_mode']['mcu_battery_voltage_report'] = "Invalid";
 				}}
 				return 2;
+			}
+		},
+		{
+			key: [0x60],
+			fn: function(arg) { 
+				decoded_data['mcu_temperature_sample_period_idle'] = decode_field(arg, 4, 31, 0, "unsigned");
+				return 4;
+			}
+		},
+		{
+			key: [0x61],
+			fn: function(arg) { 
+				decoded_data['mcu_temperature_sample_period_active'] = decode_field(arg, 4, 31, 0, "unsigned");
+				return 4;
+			}
+		},
+		{
+			key: [0x62],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('mcu_temperature_threshold')) {
+					decoded_data['mcu_temperature_threshold'] = {};
+				}
+				decoded_data['mcu_temperature_threshold']['mcu_temperature_threshold_high'] = decode_field(arg, 2, 15, 8, "signed");
+				decoded_data['mcu_temperature_threshold']['mcu_temperature_threshold_low'] = decode_field(arg, 2, 7, 0, "signed");
+				return 2;
+			}
+		},
+		{
+			key: [0x63],
+			fn: function(arg) { 
+				var val = decode_field(arg, 1, 0, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['mcu_temperature_thresholds_enabled'] = "Disabled";
+						break;
+					case 1:
+						decoded_data['mcu_temperature_thresholds_enabled'] = "Enabled";
+						break;
+					default:
+						decoded_data['mcu_temperature_thresholds_enabled'] = "Invalid";
+				}}
+				return 1;
 			}
 		},
 		{
@@ -761,7 +887,7 @@ if (input.fPort === 10) {
 		{
 			key: [0x00, 0xBA],
 			fn: function(arg) { 
-				decoded_data['battery_voltage'] = (decode_field(arg, 1, 6, 0, "unsigned") * 0.01).toFixed(2);
+				decoded_data['battery_voltage'] = (decode_field(arg, 1, 6, 0, "unsigned") * 0.01 + 2.5).toFixed(2);
 				return 1;
 			}
 		},
@@ -777,6 +903,20 @@ if (input.fPort === 10) {
 			fn: function(arg) { 
 				decoded_data['rem_batt_days'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
+			}
+		},
+		{
+			key: [0x03, 0x67],
+			fn: function(arg) { 
+				decoded_data['ambient_temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
+				return 2;
+			}
+		},
+		{
+			key: [0x04, 0x68],
+			fn: function(arg) { 
+				decoded_data['relative_humidity'] = (decode_field(arg, 1, 7, 0, "unsigned") * 0.5).toFixed(1);
+				return 1;
 			}
 		},
 		{
@@ -995,14 +1135,14 @@ if (input.fPort === 25) {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (to_uint(output << 8)) | bytes[i];
 			}
-			return output;
+			return to_uint(output);
 		}
 		if (data_type === "signed") {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (output << 8) | bytes[i];
 			}
 			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			if (output >= Math.pow(2, 8 * bytes.length - 1)) {
 				output -= Math.pow(2, 8 * bytes.length);
 			}
 			return output;

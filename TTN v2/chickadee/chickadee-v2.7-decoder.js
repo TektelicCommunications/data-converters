@@ -185,7 +185,14 @@ if (input.fPort === 10) {
 		{
 			key: [0x00, 0x92],
 			fn: function(arg) { 
-				decoded_data['ground_speed'] = (decode_field(arg, 1, 7, 0, "unsigned") * (5/18)).toFixed(3);
+				var val = decode_field(arg, 1, 7, 0, "unsigned");
+				{switch (val){
+					case 255:
+						decoded_data['ground_speed'] = "Invalid";
+						break;
+					default:
+						decoded_data['ground_speed'] = (val * (5/18)).toFixed(3);
+				}}
 				return 1;
 			}
 		},
@@ -279,6 +286,7 @@ if (input.fPort === 25) {
 					for (var i = 0; i < loop; i++) {
 						var group = {};
 						group['BD_ADDR_0'] = decode_field(arg, 7, 55, 8, "hexstring");
+						group['rssi_0'] = decode_field(arg, 7, 7, 0, "signed");
 						data.push(group);
 						arg = arg.slice(7);
 					}
@@ -297,6 +305,7 @@ if (input.fPort === 25) {
 					for (var i = 0; i < loop; i++) {
 						var group = {};
 						group['BD_ADDR_1'] = decode_field(arg, 4, 31, 8, "hexstring");
+						group['rssi_1'] = decode_field(arg, 4, 7, 0, "signed");
 						data.push(group);
 						arg = arg.slice(4);
 					}
@@ -315,6 +324,7 @@ if (input.fPort === 25) {
 					for (var i = 0; i < loop; i++) {
 						var group = {};
 						group['BD_ADDR_2'] = decode_field(arg, 4, 31, 8, "hexstring");
+						group['rssi_2'] = decode_field(arg, 4, 7, 0, "signed");
 						data.push(group);
 						arg = arg.slice(4);
 					}
@@ -333,6 +343,7 @@ if (input.fPort === 25) {
 					for (var i = 0; i < loop; i++) {
 						var group = {};
 						group['BD_ADDR_3'] = decode_field(arg, 4, 31, 8, "hexstring");
+						group['rssi_3'] = decode_field(arg, 4, 7, 0, "signed");
 						data.push(group);
 						arg = arg.slice(4);
 					}
@@ -351,6 +362,7 @@ if (input.fPort === 25) {
 					for (var i = 0; i < loop; i++) {
 						var group = {};
 						group['BD_ADDR_4'] = decode_field(arg, 4, 31, 8, "hexstring");
+						group['rssi_4'] = decode_field(arg, 4, 7, 0, "signed");
 						data.push(group);
 						arg = arg.slice(4);
 					}
@@ -1194,14 +1206,14 @@ if (input.fPort === 100) {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (to_uint(output << 8)) | bytes[i];
 			}
-			return output;
+			return to_uint(output);
 		}
 		if (data_type === "signed") {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (output << 8) | bytes[i];
 			}
 			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			if (output >= Math.pow(2, 8 * bytes.length - 1)) {
 				output -= Math.pow(2, 8 * bytes.length);
 			}
 			return output;

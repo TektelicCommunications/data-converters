@@ -1,12 +1,12 @@
-function decodeUplink(input){
-
 	var decoded_data = {};
 	var decoder = [];
 	var errors = [];
-	var bytes = convertToUint8Array(input.bytes);
+	var bytes = convertToUint8Array(bytes);
 	decoded_data['raw'] = toHexString(bytes).toUpperCase();
-	decoded_data['fPort'] = input.fPort;
-
+	decoded_data['port'] = port;
+	var input = {
+		"fPort": port,
+	}
 	if(input.fPort === 101){
 		decoder = [
 			{
@@ -37,9 +37,26 @@ function decodeUplink(input){
 			}
 		];
 	}
-
+	
 if (input.fPort === 10) {
 	decoder = [
+		{
+			key: [0x00, 0x01],
+			fn: function(arg) { 
+				var val = decode_field(arg, 1, 7, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['acceleration_alarm'] = "Motion Cleared";
+						break;
+					case 255:
+						decoded_data['acceleration_alarm'] = "Motion Detected";
+						break;
+					default:
+						decoded_data['acceleration_alarm'] = "Invalid";
+				}}
+				return 1;
+			}
+		},
 		{
 			key: [0x00, 0xD3],
 			fn: function(arg) { 
@@ -84,14 +101,7 @@ if (input.fPort === 10) {
 		{
 			key: [0x00, 0x92],
 			fn: function(arg) { 
-				var val = decode_field(arg, 1, 7, 0, "unsigned");
-				{switch (val){
-					case 255:
-						decoded_data['ground_speed'] = "Invalid";
-						break;
-					default:
-						decoded_data['ground_speed'] = (val * (5/18)).toFixed(3);
-				}}
+				decoded_data['ground_speed'] = (decode_field(arg, 1, 7, 0, "unsigned") * (5/18)).toFixed(3);
 				return 1;
 			}
 		},
@@ -637,7 +647,7 @@ if (input.fPort === 100) {
 		{
 			key: [0x22],
 			fn: function(arg) { 
-				decoded_data['ticks_normal_state'] = decode_field(arg, 2, 15, 0, "unsigned");
+				decoded_data['ticks_mobility_state'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
@@ -652,6 +662,13 @@ if (input.fPort === 100) {
 			key: [0x24],
 			fn: function(arg) { 
 				decoded_data['ticks_accelerometer'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+			}
+		},
+		{
+			key: [0x2F],
+			fn: function(arg) { 
+				decoded_data['ticks_stillness_state'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
@@ -970,14 +987,45 @@ if (input.fPort === 100) {
 		{
 			key: [0x42],
 			fn: function(arg) { 
-				decoded_data['sleep_acceleration_threshold'] = (decode_field(arg, 2, 15, 0, "unsigned") * 0.001).toFixed(3);
+				decoded_data['accl_trigger_threshold'] = decode_field(arg, 2, 15, 0, "unsigned");
 				return 2;
 			}
 		},
 		{
 			key: [0x43],
 			fn: function(arg) { 
-				decoded_data['timeout_to_sleep'] = decode_field(arg, 1, 7, 0, "unsigned");
+				decoded_data['accl_event_grace_period'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+			}
+		},
+		{
+			key: [0x46],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('accl_tx')) {
+					decoded_data['accl_tx'] = {};
+				}
+				var val = decode_field(arg, 1, 0, 0, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['accl_tx']['accl_alarms'] = "Disabled";
+						break;
+					case 1:
+						decoded_data['accl_tx']['accl_alarms'] = "Enabled";
+						break;
+					default:
+						decoded_data['accl_tx']['accl_alarms'] = "Invalid";
+				}}
+				var val = decode_field(arg, 1, 1, 1, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['accl_tx']['accl_assist'] = "Disabled";
+						break;
+					case 1:
+						decoded_data['accl_tx']['accl_assist'] = "Enabled";
+						break;
+					default:
+						decoded_data['accl_tx']['accl_assist'] = "Invalid";
+				}}
 				return 1;
 			}
 		},
@@ -1517,12 +1565,5 @@ if (input.fPort === 15) {
 		}
 		return arr;
 	}
-
-    var output = {
-        "data": decoded_data,
-		"errors": errors,
-		"warnings": [],
-    };
-
-    return output;
-}
+    decoded_data["errors"] = errors;
+    return decoded_data;
