@@ -975,8 +975,8 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('rh_threshold')) {
 					decoded_data['rh_threshold'] = {};
 				}
-				decoded_data['rh_threshold']['rh_threshold_high'] = (decode_field(arg, 2, 15, 8, "unsigned") * 0.5).toFixed(1);
-				decoded_data['rh_threshold']['rh_threshold_low'] = (decode_field(arg, 2, 7, 0, "unsigned") * 0.5).toFixed(1);
+				decoded_data['rh_threshold']['rh_threshold_high'] = (decode_field(arg, 2, 15, 8, "unsigned")).toFixed(1);
+				decoded_data['rh_threshold']['rh_threshold_low'] = (decode_field(arg, 2, 7, 0, "unsigned")).toFixed(1);
 				return 2;
 			}
 		},
@@ -1672,7 +1672,7 @@ if (input.fPort === 5) {
 					case 4:
 						decoded_data['reset_diagnostics']['reset_reason'] = "Independent watchdog reset";
 						break;
-					case 16:
+					case 8:
 						decoded_data['reset_diagnostics']['reset_reason'] = "Power loss reset";
 						break;
 					case 128:
@@ -1704,9 +1704,19 @@ if (input.fPort === 5) {
 				if(!decoded_data.hasOwnProperty('sensor_assert_diagnostics')) {
 					decoded_data['sensor_assert_diagnostics'] = {};
 				}
-				decoded_data['sensor_assert_diagnostics']['Ir_failure'] = decode_field(arg, 8, 63, 32, "unsigned");
+				decoded_data['sensor_assert_diagnostics']['lr_failure'] = decode_field(arg, 8, 63, 32, "unsigned");
 				decoded_data['sensor_assert_diagnostics']['pc_failure'] = decode_field(arg, 8, 31, 0, "unsigned");
 				return 8;
+			}
+		},
+		{
+			key: [0x40],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('system_diagnostics_query')) {
+					decoded_data['system_diagnostics_query'] = {};
+				}
+				decoded_data['system_diagnostics_query']['systems_diagnostics_query'] = decode_field(arg, 1, 7, 0, "unsigned");
+				return 1;
 			}
 		},
 	];
@@ -1797,14 +1807,14 @@ if (input.fPort === 5) {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (to_uint(output << 8)) | bytes[i];
 			}
-			return output;
+			return to_uint(output);
 		}
 		if (data_type === "signed") {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (output << 8) | bytes[i];
 			}
 			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			if (output >= Math.pow(2, 8 * bytes.length - 1)) {
 				output -= Math.pow(2, 8 * bytes.length);
 			}
 			return output;
