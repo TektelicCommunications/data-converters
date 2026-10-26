@@ -1119,7 +1119,7 @@ function encodeDownlink(input) {
                 "bit_end": 8,
                 "type": "unsigned",
                 "round": 1,
-                "coefficient": "0.5",
+                "coefficient": 1,
                 "access": "RW",
                 "multiple": 0
             },
@@ -1129,7 +1129,7 @@ function encodeDownlink(input) {
                 "bit_end": 0,
                 "type": "unsigned",
                 "round": 1,
-                "coefficient": "0.5",
+                "coefficient": 1,
                 "access": "RW",
                 "multiple": 0
             }
@@ -1834,6 +1834,23 @@ function encodeDownlink(input) {
             "port": 100,
             "or_80_to_write": 1
         }
+    },
+    "system_diagnostics": {
+        "system_diagnostics_query": {
+            "header": "0x40",
+            "or_80_to_write": "",
+            "port": 5,
+            "systems_diagnostics_query": {
+                "data_size": 1,
+                "bit_start": 7,
+                "bit_end": 0,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "R",
+                "multiple": 0
+            }
+        }
     }
 }
     function make_multiple_of_8 (bits) {
@@ -2199,13 +2216,47 @@ function encodeDownlink(input) {
         write_to_port(bytes, lookup["port"], encoded_data);
     }
 
+    function coefficient_to_number(coefficient) {
+        if (coefficient === "" || coefficient === undefined || coefficient === null) {
+            return 1;
+        }
+        if (typeof coefficient === "number") {
+            return coefficient;
+        }
+
+        var expression = String(coefficient).trim();
+        var number = Number(expression);
+        if (!isNaN(number)) {
+            return number;
+        }
+
+        expression = expression.replace(/^\((.*)\)$/, "$1").replace(/\s+/g, "");
+        var fraction = expression.split("/");
+        if (fraction.length === 2) {
+            var numerator = Number(fraction[0]);
+            var denominator = fraction[1];
+            if (denominator.indexOf("**") !== -1) {
+                var power = denominator.split("**");
+                denominator = Math.pow(Number(power[0]), Number(power[1]));
+            } else {
+                denominator = Number(denominator);
+            }
+
+            if (!isNaN(numerator) && !isNaN(denominator)) {
+                return numerator / denominator;
+            }
+        }
+
+        throw new Error("Invalid coefficient: " + coefficient);
+    }
+
     function encode_write_field(command, lookup, encoded_data) {
         var bytes = format_header(lookup["header"], false, lookup["or_80_to_write"]);
 
         var value = command["write"];
         if ( (lookup["type"] !== "string") && (lookup["type"] !== "hexstring") ) {
             value = Number(value) - Number(lookup["addition"] ? lookup["addition"] : 0)
-            value = Number(value)/Number(lookup["coefficient"]);
+            value = Number(value)/coefficient_to_number(lookup["coefficient"]);
             // TODO: ideally this should be done inside of write_bits, not before it
         }
 
@@ -2249,7 +2300,7 @@ function encodeDownlink(input) {
 
             if ( (lookup["type"] !== "string") && (lookup["type"] !== "hexstring") ) {
                 value = Number(value) - Number(lookup["addition"] ? lookup["addition"] : 0)
-                value = Number(value)/Number(lookup["coefficient"]);
+                value = Number(value)/coefficient_to_number(lookup["coefficient"]);
                 // TODO: ideally this should be done inside of write_bits, not before it
             }
 

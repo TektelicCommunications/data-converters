@@ -24,10 +24,10 @@
 								invalid_registers.push("0x" + arg[i].toString(16));
 							}
 							arg = arg.slice(num_invalid_writes);
-							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from downlink (' + downlink_fcnt + ') for register(s): ' + invalid_registers);
 						}
 						else {
-							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+							responses.push('All write commands from downlink (' + downlink_fcnt + ') were successful');
 						}
 						invalid_registers = [];
 					}
@@ -153,24 +153,25 @@ if (input.fPort === 100) {
 			}
 		},
 		{
-			key: [0x13],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('loramac_rx2')) {
-					decoded_data['loramac_rx2'] = {};
-				}
-				decoded_data['loramac_rx2']['dr_number'] = decode_field(arg, 5, 7, 0, "unsigned");
-				decoded_data['loramac_rx2']['frequency'] = decode_field(arg, 5, 39, 8, "unsigned");
-				return 5;
-			}
-		},
-		{
 			key: [0x12],
 			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('loramac_dr_tx')) {
 					decoded_data['loramac_dr_tx'] = {};
 				}
+				decoded_data['loramac_dr_tx']['dr_number'] = decode_field(arg, 2, 11, 8, "unsigned");
 				decoded_data['loramac_dr_tx']['tx_power_number'] = decode_field(arg, 2, 3, 0, "unsigned");
 				return 2;
+			}
+		},
+		{
+			key: [0x13],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('loramac_rx2')) {
+					decoded_data['loramac_rx2'] = {};
+				}
+				decoded_data['loramac_rx2']['frequency'] = decode_field(arg, 5, 39, 8, "unsigned");
+				decoded_data['loramac_rx2']['rx2_dr_number'] = decode_field(arg, 5, 7, 0, "unsigned");
+				return 5;
 			}
 		},
 		{
@@ -260,7 +261,7 @@ if (input.fPort === 11) {
 				var val = decode_field(arg, 9, 71, 64, "unsigned");
 				{switch (val){
 					case 255:
-						decoded_data['remaining_battery_capacity'] = "Unavailable";
+						decoded_data['remaining_battery_capacity'] = 255;
 						break;
 					default:
 						decoded_data['remaining_battery_capacity'] = val;
@@ -290,23 +291,23 @@ if (input.fPort === 11) {
 				var val = decode_field(arg, 9, 59, 50, "unsigned");
 				{switch (val){
 					case 1023:
-						decoded_data['st1'] = "Unavailable";
+						decoded_data['st1'] = 1023;
 						break;
 					default:
-						decoded_data['st1'] = (val*0.05).toFixed(2);
+						decoded_data['st1'] = Number((val * 0.05).toFixed(2));
 				}}
 				var val = decode_field(arg, 9, 49, 40, "unsigned");
 				{switch (val){
 					case 1023:
-						decoded_data['st2'] = "Unavailable";
+						decoded_data['st2'] = 1023;
 						break;
 					default:
-						decoded_data['st2'] = (val*0.05).toFixed(2);
+						decoded_data['st2'] = Number((val * 0.05).toFixed(2));
 				}}
 				var val = decode_field(arg, 9, 39, 32, "unsigned");
 				{switch (val){
 					case 255:
-						decoded_data['pr'] = "Unavailable";
+						decoded_data['pr'] = 255;
 						break;
 					default:
 						decoded_data['pr'] = val;
@@ -314,7 +315,7 @@ if (input.fPort === 11) {
 				var val = decode_field(arg, 9, 31, 24, "unsigned");
 				{switch (val){
 					case 255:
-						decoded_data['rr'] = "Unavailable";
+						decoded_data['rr'] = 255;
 						break;
 					default:
 						decoded_data['rr'] = val;
@@ -322,10 +323,10 @@ if (input.fPort === 11) {
 				var val = decode_field(arg, 9, 23, 16, "unsigned");
 				{switch (val){
 					case 255:
-						decoded_data['ce'] = "Unavailable";
+						decoded_data['ce'] = 255;
 						break;
 					default:
-						decoded_data['ce'] = (val*0.05).toFixed(2);
+						decoded_data['ce'] = Number((val * 0.05).toFixed(2));
 				}}
 				var val = decode_field(arg, 9, 15, 15, "unsigned");
 				{switch (val){
@@ -341,7 +342,7 @@ if (input.fPort === 11) {
 				var val = decode_field(arg, 9, 14, 8, "unsigned");
 				{switch (val){
 					case 127:
-						decoded_data['position'] = "Unavailable";
+						decoded_data['position'] = 127;
 						break;
 					default:
 						decoded_data['position'] = val;
@@ -349,10 +350,10 @@ if (input.fPort === 11) {
 				var val = decode_field(arg, 9, 7, 0, "unsigned");
 				{switch (val){
 					case 255:
-						decoded_data['af2'] = "Unavailable";
+						decoded_data['af2'] = 255;
 						break;
 					default:
-						decoded_data['af2'] = (val*0.01).toFixed(2);
+						decoded_data['af2'] = Number((val * 0.01).toFixed(2));
 				}}
 				return 9;
 			}
@@ -445,14 +446,14 @@ if (input.fPort === 11) {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (to_uint(output << 8)) | bytes[i];
 			}
-			return output;
+			return to_uint(output);
 		}
 		if (data_type === "signed") {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (output << 8) | bytes[i];
 			}
 			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			if (output >= Math.pow(2, 8 * bytes.length - 1)) {
 				output -= Math.pow(2, 8 * bytes.length);
 			}
 			return output;
