@@ -24,10 +24,10 @@
 								invalid_registers.push("0x" + arg[i].toString(16));
 							}
 							arg = arg.slice(num_invalid_writes);
-							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from downlink (' + downlink_fcnt + ') for register(s): ' + invalid_registers);
 						}
 						else {
-							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+							responses.push('All write commands from downlink (' + downlink_fcnt + ') were successful');
 						}
 						invalid_registers = [];
 					}
@@ -40,48 +40,6 @@
 	
 if (input.fPort === 100) {
 	decoder = [
-		{
-			key: [0x00],
-			fn: function(arg) { 
-				decoded_data['device_eui'] = decode_field(arg, 8, 63, 0, "hexstring");
-				return 8;
-			}
-		},
-		{
-			key: [0x01],
-			fn: function(arg) { 
-				decoded_data['app_eui'] = decode_field(arg, 8, 63, 0, "hexstring");
-				return 8;
-			}
-		},
-		{
-			key: [0x02],
-			fn: function(arg) { 
-				decoded_data['app_key'] = decode_field(arg, 16, 127, 0, "hexstring");
-				return 16;
-			}
-		},
-		{
-			key: [0x03],
-			fn: function(arg) { 
-				decoded_data['device_address'] = decode_field(arg, 4, 31, 0, "hexstring");
-				return 4;
-			}
-		},
-		{
-			key: [0x04],
-			fn: function(arg) { 
-				decoded_data['network_session_key'] = decode_field(arg, 16, 127, 0, "hexstring");
-				return 16;
-			}
-		},
-		{
-			key: [0x05],
-			fn: function(arg) { 
-				decoded_data['app_session_key'] = decode_field(arg, 16, 127, 0, "hexstring");
-				return 16;
-			}
-		},
 		{
 			key: [0x10],
 			fn: function(arg) { 
@@ -105,6 +63,17 @@ if (input.fPort === 100) {
 				if(!decoded_data.hasOwnProperty('loramac_opts')) {
 					decoded_data['loramac_opts'] = {};
 				}
+				var val = decode_field(arg, 2, 7, 4, "unsigned");
+				{switch (val){
+					case 0:
+						decoded_data['loramac_opts']['lora_class'] = "Class A";
+						break;
+					case 12:
+						decoded_data['loramac_opts']['lora_class'] = "Enable";
+						break;
+					default:
+						decoded_data['loramac_opts']['lora_class'] = "Invalid";
+				}}
 				var val = decode_field(arg, 2, 3, 3, "unsigned");
 				{switch (val){
 					case 0:
@@ -153,24 +122,25 @@ if (input.fPort === 100) {
 			}
 		},
 		{
-			key: [0x13],
-			fn: function(arg) { 
-				if(!decoded_data.hasOwnProperty('loramac_rx2')) {
-					decoded_data['loramac_rx2'] = {};
-				}
-				decoded_data['loramac_rx2']['dr_number'] = decode_field(arg, 5, 7, 0, "unsigned");
-				decoded_data['loramac_rx2']['frequency'] = decode_field(arg, 5, 39, 8, "unsigned");
-				return 5;
-			}
-		},
-		{
 			key: [0x12],
 			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('loramac_dr_tx')) {
 					decoded_data['loramac_dr_tx'] = {};
 				}
 				decoded_data['loramac_dr_tx']['tx_power'] = decode_field(arg, 2, 3, 0, "unsigned");
+				decoded_data['loramac_dr_tx']['dr_number'] = decode_field(arg, 2, 11, 8, "unsigned");
 				return 2;
+			}
+		},
+		{
+			key: [0x13],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('loramac_rx2')) {
+					decoded_data['loramac_rx2'] = {};
+				}
+				decoded_data['loramac_rx2']['frequency'] = decode_field(arg, 5, 39, 8, "unsigned");
+				decoded_data['loramac_rx2']['dr_number'] = decode_field(arg, 5, 7, 0, "unsigned");
+				return 5;
 			}
 		},
 		{
@@ -712,72 +682,6 @@ if (input.fPort === 20) {
 		},
 	];
 }
-if (input.fPort === 21) {
-	decoder = [
-		{
-			key: [0x6A],
-			fn: function(arg) { 
-				decoded_data['modbus_rtu_polling_period_6A'] = decode_field(arg, 10, 79, 0, "unsigned");
-				return 10;
-			}
-		},
-	];
-}
-if (input.fPort === 22) {
-	decoder = [
-		{
-			key: [0x6B],
-			fn: function(arg) { 
-				decoded_data['modbus_rtu_polling_period_6B'] = decode_field(arg, 10, 79, 0, "unsigned");
-				return 10;
-			}
-		},
-	];
-}
-if (input.fPort === 23) {
-	decoder = [
-		{
-			key: [0x6C],
-			fn: function(arg) { 
-				decoded_data['modbus_rtu_polling_period_6C'] = decode_field(arg, 10, 79, 0, "unsigned");
-				return 10;
-			}
-		},
-	];
-}
-if (input.fPort === 24) {
-	decoder = [
-		{
-			key: [0x6D],
-			fn: function(arg) { 
-				decoded_data['modbus_rtu_polling_period_6D'] = decode_field(arg, 10, 79, 0, "unsigned");
-				return 10;
-			}
-		},
-	];
-}
-if (input.fPort === 25) {
-	decoder = [
-		{
-			key: [0x6E],
-			fn: function(arg) { 
-				decoded_data['modbus_rtu_polling_period_6E'] = decode_field(arg, 10, 79, 0, "unsigned");
-				return 10;
-			}
-		},
-	];
-}
-if (input.fPort === 26) {
-	decoder = [
-		{
-			key: [0x6F],
-			fn: function(arg) { 
-				decoded_data['modbus_rtu_polling_period_6F'] = decode_field(arg, 10, 79, 0, "unsigned");
-				return 10;
-			}
-		},
-	];
-}
 if (input.fPort === 10) {
 	decoder = [
 		{
@@ -841,10 +745,10 @@ if (input.fPort === 10) {
 				var val = decode_field(arg, 1, 7, 0, "unsigned");
 				{switch (val){
 					case 0:
-						decoded_data['input_1'] = "False";
+						decoded_data['input_1'] = "FALSE";
 						break;
 					case 1:
-						decoded_data['input_1'] = "True";
+						decoded_data['input_1'] = "TRUE";
 						break;
 					default:
 						decoded_data['input_1'] = "Invalid";
@@ -878,6 +782,96 @@ if (input.fPort === 10) {
 			fn: function(arg) { 
 				decoded_data['mcu_temperature'] = (decode_field(arg, 2, 15, 0, "signed") * 0.1).toFixed(1);
 				return 2;
+			}
+		},
+	];
+}
+if (input.fPort === 21) {
+	decoder = [
+		{
+			key: [0x6A],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('modbus_rtu_polling_command_6A')) {
+					decoded_data['modbus_rtu_polling_command_6A'] = {};
+				}
+				decoded_data['modbus_rtu_polling_command_6A']['polling_A'] = decode_field(arg, 10, 15, 0, "unsigned");
+				decoded_data['modbus_rtu_polling_command_6A']['command_A'] = decode_field(arg, 10, 79, 16, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 22) {
+	decoder = [
+		{
+			key: [0x6B],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('modbus_rtu_polling_command_6B')) {
+					decoded_data['modbus_rtu_polling_command_6B'] = {};
+				}
+				decoded_data['modbus_rtu_polling_command_6B']['polling_B'] = decode_field(arg, 10, 15, 0, "unsigned");
+				decoded_data['modbus_rtu_polling_command_6B']['command_B'] = decode_field(arg, 10, 79, 16, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 23) {
+	decoder = [
+		{
+			key: [0x6C],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('modbus_rtu_polling_command_6C')) {
+					decoded_data['modbus_rtu_polling_command_6C'] = {};
+				}
+				decoded_data['modbus_rtu_polling_command_6C']['polling_C'] = decode_field(arg, 10, 15, 0, "unsigned");
+				decoded_data['modbus_rtu_polling_command_6C']['command_C'] = decode_field(arg, 10, 79, 16, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 24) {
+	decoder = [
+		{
+			key: [0x6D],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('modbus_rtu_polling_command_6D')) {
+					decoded_data['modbus_rtu_polling_command_6D'] = {};
+				}
+				decoded_data['modbus_rtu_polling_command_6D']['polling_D'] = decode_field(arg, 10, 15, 0, "unsigned");
+				decoded_data['modbus_rtu_polling_command_6D']['command_D'] = decode_field(arg, 10, 79, 16, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 25) {
+	decoder = [
+		{
+			key: [0x6E],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('modbus_rtu_polling_command_6E')) {
+					decoded_data['modbus_rtu_polling_command_6E'] = {};
+				}
+				decoded_data['modbus_rtu_polling_command_6E']['polling_E'] = decode_field(arg, 10, 15, 0, "unsigned");
+				decoded_data['modbus_rtu_polling_command_6E']['command_E'] = decode_field(arg, 10, 79, 16, "unsigned");
+				return 10;
+			}
+		},
+	];
+}
+if (input.fPort === 26) {
+	decoder = [
+		{
+			key: [0x6F],
+			fn: function(arg) { 
+				if(!decoded_data.hasOwnProperty('modbus_rtu_polling_command_6F')) {
+					decoded_data['modbus_rtu_polling_command_6F'] = {};
+				}
+				decoded_data['modbus_rtu_polling_command_6F']['polling_F'] = decode_field(arg, 10, 15, 0, "unsigned");
+				decoded_data['modbus_rtu_polling_command_6F']['command_F'] = decode_field(arg, 10, 79, 16, "unsigned");
+				return 10;
 			}
 		},
 	];
@@ -968,14 +962,14 @@ if (input.fPort === 10) {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (to_uint(output << 8)) | bytes[i];
 			}
-			return output;
+			return to_uint(output);
 		}
 		if (data_type === "signed") {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (output << 8) | bytes[i];
 			}
 			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			if (output >= Math.pow(2, 8 * bytes.length - 1)) {
 				output -= Math.pow(2, 8 * bytes.length);
 			}
 			return output;
