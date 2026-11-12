@@ -22,10 +22,10 @@
 								invalid_registers.push("0x" + arg[i].toString(16));
 							}
 							arg = arg.slice(num_invalid_writes);
-							responses.push(num_invalid_writes + ' Invalid write command(s) from DL:' + downlink_fcnt + ' for register(s): ' + invalid_registers);
+							responses.push(num_invalid_writes + ' Invalid write command(s) from downlink (' + downlink_fcnt + ') for register(s): ' + invalid_registers);
 						}
 						else {
-							responses.push('All write commands from DL:' + downlink_fcnt + 'were successfull');
+							responses.push('All write commands from downlink (' + downlink_fcnt + ') were successful');
 						}
 						invalid_registers = [];
 					}
@@ -172,13 +172,10 @@ if (input.fPort === 10) {
 	];
 }
 if (input.fPort === 32) {
-	if (bytes.length >= 2) {
-		decoded_data['tag_entry'] = decode_field(bytes, 2, 15, 0, "unsigned");
-		bytes = slice(bytes, 2, bytes.length);
-	} else {
-		decoded_data['tag_entry'] = null;
-		bytes = [];
-	}
+	bytes = slice(bytes, (function(arg) {
+				decoded_data['tag_entry'] = decode_field(arg, 2, 15, 0, "unsigned");
+				return 2;
+	})(bytes), bytes.length);
 	decoder = [
 		{
 			key: [0x03, 0x67],
@@ -1021,14 +1018,14 @@ if (input.fPort === 100) {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (to_uint(output << 8)) | bytes[i];
 			}
-			return output;
+			return to_uint(output);
 		}
 		if (data_type === "signed") {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (output << 8) | bytes[i];
 			}
 			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			if (output >= Math.pow(2, 8 * bytes.length - 1)) {
 				output -= Math.pow(2, 8 * bytes.length);
 			}
 			return output;

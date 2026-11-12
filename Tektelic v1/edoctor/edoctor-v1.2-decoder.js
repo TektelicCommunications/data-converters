@@ -41,48 +41,6 @@
 if (input.fPort === 100) {
 	decoder = [
 		{
-			key: [0x00],
-			fn: function(arg) { 
-				decoded_data['device_eui'] = decode_field(arg, 8, 63, 0, "hexstring");
-				return 8;
-			}
-		},
-		{
-			key: [0x01],
-			fn: function(arg) { 
-				decoded_data['app_eui'] = decode_field(arg, 8, 63, 0, "hexstring");
-				return 8;
-			}
-		},
-		{
-			key: [0x02],
-			fn: function(arg) { 
-				decoded_data['app_key'] = decode_field(arg, 16, 127, 0, "hexstring");
-				return 16;
-			}
-		},
-		{
-			key: [0x03],
-			fn: function(arg) { 
-				decoded_data['device_address'] = decode_field(arg, 4, 31, 0, "hexstring");
-				return 4;
-			}
-		},
-		{
-			key: [0x04],
-			fn: function(arg) { 
-				decoded_data['network_session_key'] = decode_field(arg, 16, 127, 0, "hexstring");
-				return 16;
-			}
-		},
-		{
-			key: [0x05],
-			fn: function(arg) { 
-				decoded_data['app_session_key'] = decode_field(arg, 16, 127, 0, "hexstring");
-				return 16;
-			}
-		},
-		{
 			key: [0x10],
 			fn: function(arg) { 
 				var val = decode_field(arg, 2, 15, 15, "unsigned");

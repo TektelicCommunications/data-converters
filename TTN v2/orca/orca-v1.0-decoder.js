@@ -42,48 +42,6 @@ function Decoder(bytes, port) {
 if (input.fPort === 100) {
 	decoder = [
 		{
-			key: [0x00],
-			fn: function(arg) { 
-				decoded_data['device_eui'] = (decode_field(arg, 8, 63, 0, "hexstring")).toFixed(1);
-				return 8;
-			}
-		},
-		{
-			key: [0x01],
-			fn: function(arg) { 
-				decoded_data['app_eui'] = (decode_field(arg, 8, 63, 0, "hexstring")).toFixed(1);
-				return 8;
-			}
-		},
-		{
-			key: [0x02],
-			fn: function(arg) { 
-				decoded_data['app_key'] = (decode_field(arg, 16, 127, 0, "hexstring")).toFixed(1);
-				return 16;
-			}
-		},
-		{
-			key: [0x03],
-			fn: function(arg) { 
-				decoded_data['device_address'] = (decode_field(arg, 4, 31, 0, "hexstring")).toFixed(1);
-				return 4;
-			}
-		},
-		{
-			key: [0x04],
-			fn: function(arg) { 
-				decoded_data['network_session_key'] = (decode_field(arg, 16, 127, 0, "hexstring")).toFixed(1);
-				return 16;
-			}
-		},
-		{
-			key: [0x05],
-			fn: function(arg) { 
-				decoded_data['app_session_key'] = (decode_field(arg, 16, 127, 0, "hexstring")).toFixed(1);
-				return 16;
-			}
-		},
-		{
 			key: [0x10],
 			fn: function(arg) { 
 				if(!decoded_data.hasOwnProperty('loramac_join_mode')) {
@@ -1405,14 +1363,14 @@ if (input.fPort === 15) {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (to_uint(output << 8)) | bytes[i];
 			}
-			return output;
+			return to_uint(output);
 		}
 		if (data_type === "signed") {
 			for (var i = 0; i < bytes.length; ++i) {
 				output = (output << 8) | bytes[i];
 			}
 			// Convert to signed, based on value size
-			if (output > Math.pow(2, 8 * bytes.length - 1)) {
+			if (output >= Math.pow(2, 8 * bytes.length - 1)) {
 				output -= Math.pow(2, 8 * bytes.length);
 			}
 			return output;

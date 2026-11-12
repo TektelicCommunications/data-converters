@@ -1,86 +1,6 @@
 function encodeDownlink(input) {
    var sensor = 
 {
-    "lorawan": {
-        "device_eui": {
-            "header": "0x00",
-            "data_size": 8,
-            "bit_start": 63,
-            "bit_end": 0,
-            "type": "hexstring",
-            "round": "",
-            "coefficient": 1,
-            "access": "R",
-            "multiple": 0,
-            "port": 100,
-            "or_80_to_write": 1
-        },
-        "app_eui": {
-            "header": "0x01",
-            "data_size": 8,
-            "bit_start": 63,
-            "bit_end": 0,
-            "type": "hexstring",
-            "round": "",
-            "coefficient": 1,
-            "access": "R",
-            "multiple": 0,
-            "port": 100,
-            "or_80_to_write": 1
-        },
-        "app_key": {
-            "header": "0x02",
-            "data_size": 16,
-            "bit_start": 127,
-            "bit_end": 0,
-            "type": "hexstring",
-            "round": "",
-            "coefficient": 1,
-            "access": "R",
-            "multiple": 0,
-            "port": 100,
-            "or_80_to_write": 1
-        },
-        "device_address": {
-            "header": "0x03",
-            "data_size": 4,
-            "bit_start": 31,
-            "bit_end": 0,
-            "type": "hexstring",
-            "round": "",
-            "coefficient": 1,
-            "access": "R",
-            "multiple": 0,
-            "port": 100,
-            "or_80_to_write": 1
-        },
-        "network_session_key": {
-            "header": "0x04",
-            "data_size": 16,
-            "bit_start": 127,
-            "bit_end": 0,
-            "type": "hexstring",
-            "round": "",
-            "coefficient": 1,
-            "access": "R",
-            "multiple": 0,
-            "port": 100,
-            "or_80_to_write": 1
-        },
-        "app_session_key": {
-            "header": "0x05",
-            "data_size": 16,
-            "bit_start": 127,
-            "bit_end": 0,
-            "type": "hexstring",
-            "round": "",
-            "coefficient": 1,
-            "access": "R",
-            "multiple": 0,
-            "port": 100,
-            "or_80_to_write": 1
-        }
-    },
     "loramac_config": {
         "join_mode": {
             "header": "0x10",
@@ -140,13 +60,13 @@ function encodeDownlink(input) {
                 "multiple": 0
             }
         },
-        "loramac_rx2": {
-            "header": "0x13",
+        "loramac_dr_tx": {
+            "header": "0x12",
             "or_80_to_write": 1,
             "port": 100,
-            "dr_number": {
-                "data_size": 5,
-                "bit_start": 7,
+            "tx_power": {
+                "data_size": 2,
+                "bit_start": 3,
                 "bit_end": 0,
                 "type": "unsigned",
                 "round": "",
@@ -154,6 +74,21 @@ function encodeDownlink(input) {
                 "access": "RW",
                 "multiple": 0
             },
+            "dr_number": {
+                "data_size": 2,
+                "bit_start": 11,
+                "bit_end": 8,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            }
+        },
+        "loramac_rx2": {
+            "header": "0x13",
+            "or_80_to_write": 1,
+            "port": 100,
             "frequency": {
                 "data_size": 5,
                 "bit_start": 39,
@@ -163,15 +98,10 @@ function encodeDownlink(input) {
                 "coefficient": 1,
                 "access": "RW",
                 "multiple": 0
-            }
-        },
-        "loramac_dr_tx": {
-            "header": "0x12",
-            "or_80_to_write": 1,
-            "port": 100,
-            "tx_power": {
-                "data_size": 2,
-                "bit_start": 3,
+            },
+            "dr_number": {
+                "data_size": 5,
+                "bit_start": 7,
                 "bit_end": 0,
                 "type": "unsigned",
                 "round": "",
@@ -782,8 +712,8 @@ function encodeDownlink(input) {
             "or_80_to_write": 1
         }
     },
-    "modbus_config": {
-        "modbus_rtu_symbol_timeout": {
+    "modbus_rtu_config": {
+        "serial_interface_symbol_timeout": {
             "header": "0x68",
             "data_size": 2,
             "bit_start": 15,
@@ -796,7 +726,7 @@ function encodeDownlink(input) {
             "port": 100,
             "or_80_to_write": 1
         },
-        "modbus_rtu_rx_timeout": {
+        "serial_interface_rx_timeout": {
             "header": "0x69",
             "data_size": 2,
             "bit_start": 15,
@@ -808,6 +738,156 @@ function encodeDownlink(input) {
             "multiple": 0,
             "port": 100,
             "or_80_to_write": 1
+        },
+        "modbus_rtu_polling_command_6A": {
+            "header": "0x6A",
+            "or_80_to_write": 1,
+            "port": 21,
+            "polling_A": {
+                "data_size": 10,
+                "bit_start": 15,
+                "bit_end": 0,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "command_A": {
+                "data_size": 10,
+                "bit_start": 79,
+                "bit_end": 16,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            }
+        },
+        "modbus_rtu_polling_command_6B": {
+            "header": "0x6B",
+            "or_80_to_write": 1,
+            "port": 22,
+            "polling_B": {
+                "data_size": 10,
+                "bit_start": 15,
+                "bit_end": 0,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "command_B": {
+                "data_size": 10,
+                "bit_start": 79,
+                "bit_end": 16,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            }
+        },
+        "modbus_rtu_polling_command_6C": {
+            "header": "0x6C",
+            "or_80_to_write": 1,
+            "port": 23,
+            "polling_C": {
+                "data_size": 10,
+                "bit_start": 15,
+                "bit_end": 0,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "command_C": {
+                "data_size": 10,
+                "bit_start": 79,
+                "bit_end": 16,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            }
+        },
+        "modbus_rtu_polling_command_6D": {
+            "header": "0x6D",
+            "or_80_to_write": 1,
+            "port": 24,
+            "polling_D": {
+                "data_size": 10,
+                "bit_start": 15,
+                "bit_end": 0,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "command_D": {
+                "data_size": 10,
+                "bit_start": 79,
+                "bit_end": 16,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            }
+        },
+        "modbus_rtu_polling_command_6E": {
+            "header": "0x6E",
+            "or_80_to_write": 1,
+            "port": 25,
+            "polling_E": {
+                "data_size": 10,
+                "bit_start": 15,
+                "bit_end": 0,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "command_E": {
+                "data_size": 10,
+                "bit_start": 79,
+                "bit_end": 16,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            }
+        },
+        "modbus_rtu_polling_command_6F": {
+            "header": "0x6F",
+            "or_80_to_write": 1,
+            "port": 26,
+            "polling_F": {
+                "data_size": 10,
+                "bit_start": 15,
+                "bit_end": 0,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            },
+            "command_F": {
+                "data_size": 10,
+                "bit_start": 79,
+                "bit_end": 16,
+                "type": "unsigned",
+                "round": "",
+                "coefficient": 1,
+                "access": "RW",
+                "multiple": 0
+            }
         }
     },
     "cmd_ctrl": {
@@ -1446,13 +1526,47 @@ function encodeDownlink(input) {
         write_to_port(bytes, lookup["port"], encoded_data);
     }
 
+    function coefficient_to_number(coefficient) {
+        if (coefficient === "" || coefficient === undefined || coefficient === null) {
+            return 1;
+        }
+        if (typeof coefficient === "number") {
+            return coefficient;
+        }
+
+        var expression = String(coefficient).trim();
+        var number = Number(expression);
+        if (!isNaN(number)) {
+            return number;
+        }
+
+        expression = expression.replace(/^\((.*)\)$/, "$1").replace(/\s+/g, "");
+        var fraction = expression.split("/");
+        if (fraction.length === 2) {
+            var numerator = Number(fraction[0]);
+            var denominator = fraction[1];
+            if (denominator.indexOf("**") !== -1) {
+                var power = denominator.split("**");
+                denominator = Math.pow(Number(power[0]), Number(power[1]));
+            } else {
+                denominator = Number(denominator);
+            }
+
+            if (!isNaN(numerator) && !isNaN(denominator)) {
+                return numerator / denominator;
+            }
+        }
+
+        throw new Error("Invalid coefficient: " + coefficient);
+    }
+
     function encode_write_field(command, lookup, encoded_data) {
         var bytes = format_header(lookup["header"], false, lookup["or_80_to_write"]);
 
         var value = command["write"];
         if ( (lookup["type"] !== "string") && (lookup["type"] !== "hexstring") ) {
             value = Number(value) - Number(lookup["addition"] ? lookup["addition"] : 0)
-            value = Number(value)/Number(lookup["coefficient"]);
+            value = Number(value)/coefficient_to_number(lookup["coefficient"]);
             // TODO: ideally this should be done inside of write_bits, not before it
         }
 
@@ -1496,7 +1610,7 @@ function encodeDownlink(input) {
 
             if ( (lookup["type"] !== "string") && (lookup["type"] !== "hexstring") ) {
                 value = Number(value) - Number(lookup["addition"] ? lookup["addition"] : 0)
-                value = Number(value)/Number(lookup["coefficient"]);
+                value = Number(value)/coefficient_to_number(lookup["coefficient"]);
                 // TODO: ideally this should be done inside of write_bits, not before it
             }
 
